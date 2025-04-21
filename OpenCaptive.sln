@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2FB2C163-490
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenCaptive.WebApi", "OpenCaptive.WebApi\OpenCaptive.WebApi.csproj", "{30F7BA30-3D17-4820-A7A9-FE1D023D7D5F}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "OpenCaptive.NextApp", "OpenCaptive.NextApp\OpenCaptive.NextApp.esproj", "{F50700D6-1DF7-478C-B4F7-CB9C4C8BAD27}"
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "OpenCaptive.NextApp", "OpenCaptive.NextApp\OpenCaptive.NextApp.csproj", "{F50700D6-1DF7-478C-B4F7-CB9C4C8BAD27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

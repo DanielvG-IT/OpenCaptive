@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.1184077">
+  <PropertyGroup>
+    <StartupCommand>npm run dev</StartupCommand>
+    <JavaScriptTestRoot>.</JavaScriptTestRoot>
+    <JavaScriptTestFramework>Jest</JavaScriptTestFramework>
+    <ShouldRunBuildScript>false</ShouldRunBuildScript>
+    <BuildOutputFolder>$(MSBuildProjectDirectory)\.next</BuildOutputFolder>
+    <Environment>production</Environment>
+    <EnableESLint>true</EnableESLint>
+    <EnableTypeChecking>true</EnableTypeChecking>
+    <BuildCommand>npm run build</BuildCommand>
+    <CleanCommand>npm run clean</CleanCommand>
+    <RestoreCommand>npm install</RestoreCommand>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include=".vscode\launch.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="next.config.js" />
+    <None Include="postcss.config.js" />
+    <None Include="tsconfig.json" />
+    <None Include="prettier.config.js" />
+  </ItemGroup>
+</Project>
