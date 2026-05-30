@@ -1,20 +1,79 @@
 # Contributing to OpenCaptive
 
-We welcome contributions to the OpenCaptive project and appreciate your interest in improving the codebase. To ensure a smooth contribution process, please follow the steps below:
+First off — thank you for taking the time to contribute! 🎉
 
-## Contribution Process
+This document explains how to get set up and what we expect from contributions.
 
-1. **Fork the Repository** 🍴  
-   Start by creating a personal copy of the main repository on your GitHub account. This allows you to work on your own version of the project without affecting the original code.
+## 📋 Code of Conduct
 
-2. **Create a New Feature Branch** 🌿  
-   In your forked repository, create a separate branch specifically for your changes. This helps isolate your work and makes it easier to manage and review contributions. Use a descriptive name for your branch that reflects the feature or fix you're working on.
+This project and everyone participating in it is governed by our
+[Code of Conduct](./CODE_OF_CONDUCT.md). By participating, you are expected to
+uphold it.
 
-3. **Implement Your Changes** ✍️  
-   Develop and test your feature or bug fix in your feature branch. Make sure your code follows the project's coding standards and best practices. Be sure to write tests to validate your changes and ensure that everything works as expected.
+## 🛠️ Development Setup
 
-4. **Submit a Pull Request** 🔄  
-   Once your changes are complete and fully tested, submit a pull request (PR) from your feature branch to the `main` branch of the main repository. Include a clear and concise description of the changes you made, why they are necessary, and any relevant context or documentation that might be helpful to reviewers.
+See the [Getting Started](./README.md#-getting-started) section of the README for
+prerequisites and how to run the backend and frontend apps.
 
-5. **Code Review and Approval** 👩‍🏫  
-   After submitting your pull request, the maintainers will review your code. They may request changes or ask for clarification. Engage in the review process and make any necessary updates. Once your PR is approved, it will be merged into the `main` branch.
+## 🌱 Workflow
+
+1. **Fork** the repository and clone your fork.
+2. **Create a branch** off `main` using a descriptive name:
+   - `feat/unifi-guest-auth`
+   - `fix/portal-redirect-loop`
+   - `docs/readme-setup`
+3. **Make your changes** with clear, focused commits.
+4. **Push** and open a **Pull Request** against `main`.
+5. Make sure CI is green and address review feedback.
+
+## ✅ Commit Messages
+
+We follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(optional scope): <description>
+
+[optional body]
+```
+
+Common types: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`, `ci`.
+
+Example: `feat(integrations): add MikroTik controller adapter`
+
+## 🧪 Quality Checks
+
+Before opening a PR, please run the relevant checks locally:
+
+**Backend**
+
+```bash
+dotnet build OpenCaptive.slnx
+dotnet test OpenCaptive.slnx
+```
+
+**Frontend** (run inside the app you changed, e.g. `src/Frontend/apps/admin`)
+
+```bash
+npm run lint
+npm run build
+```
+
+## 🧩 Adding a New Integration
+
+Network-controller integrations implement the interfaces in
+`OpenCaptive.Integrations.Abstractions`. To add one:
+
+1. Create a new project `OpenCaptive.Integrations.<Name>` under `src/Backend`.
+2. Reference `OpenCaptive.Integrations.Abstractions` and implement the contracts.
+3. Register it in the API's composition root.
+4. Add documentation and, where possible, tests.
+
+## 🐛 Reporting Bugs & Requesting Features
+
+Use the [issue templates](https://github.com/DanielvG-IT/OpenCaptive/issues/new/choose).
+Please include as much detail as possible — versions, steps to reproduce, and logs.
+
+## 📄 License
+
+By contributing, you agree that your contributions will be licensed under the
+[MIT License](./LICENSE).
