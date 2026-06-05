@@ -1,41 +1,62 @@
-var builder = WebApplication.CreateBuilder(args);
+using OpenCaptive.Api.Extensions;
+using OpenCaptive.Application;
+using OpenCaptive.Infrastructure;
+using Serilog;
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+namespace OpenCaptive.Api;
 
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+public partial class Program
 {
-    app.MapOpenApi();
-}
+    public static void Main(string[] args)
+    {
+        Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
 
-app.UseHttpsRedirection();
+        try
+        {
+            var builder = WebApplication.CreateBuilder(args);
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+            builder.Host.UseSerilog((context, services, configuration) => configuration
+                .ReadFrom.Configuration(context.Configuration)
+                    .ReadFrom.Services(services)
+                    .Enrich.FromLogContext());
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+            // TODO: Add OpenTelemetry (tracing + metrics) and immutable audit trail for all mutations (AVG/GDPR, NIS2, ISO 27001, NEN 7510 compliance for all tenants).
+            builder.Services.AddOpenApi();
+            builder.Services.AddProblemDetails();
+            builder.Services.AddHealthChecks();
+            builder.Services.AddCors(options => options.AddPolicy("Default", policy =>
+                policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [])
+                      .AllowAnyHeader()
+                      .AllowAnyMethod()));
 
-app.Run();
+            builder.Services.AddApplication();
+            builder.Services.AddInfrastructure(builder.Configuration);
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+            var app = builder.Build();
+
+            app.UseSerilogRequestLogging();
+            app.UseExceptionHandler();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseCors("Default");
+
+            app.MapHealthChecks("/health");
+            app.MapEndpoints();
+
+            app.Run();
+        }
+        catch (Exception ex) when (ex is not HostAbortedException)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
 }
