@@ -10,15 +10,10 @@ public static class OrganizationEndpoints
 {
   public static void MapOrganizationEndpoints(this IEndpointRouteBuilder app)
   {
-    var group = app
-      .MapGroup("/organizations")
-      .WithTags("Organizations");
+    var group = app.MapGroup("/organizations").WithTags("Organizations");
 
-    group.MapPost("/", CreateOrganization)
-      .WithName("CreateOrganization");
-
-    group.MapGet("/{id:guid}", GetOrganization)
-      .WithName("GetOrganization");
+    group.MapPost("/", CreateOrganization).WithName("CreateOrganization");
+    group.MapGet("/{id:guid}", GetOrganization).WithName("GetOrganization");
     // group.MapPatch("/{id:guid}", UpdateOrganization);
     // group.MapDelete("/{id:guid}", DeleteOrganization);
   }
@@ -30,7 +25,7 @@ public static class OrganizationEndpoints
     CancellationToken cancellationToken)
   {
     var validation = await validator.ValidateAsync(input, cancellationToken);
-    if (!validation.IsValid)
+    if (validation.IsValid is false)
     {
       return TypedResults.ValidationProblem(validation.ToDictionary());
     }
