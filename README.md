@@ -5,9 +5,10 @@
 **An open-source, enterprise-grade captive-portal platform with ultimate customization.**
 
 [![Backend CI](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/backend.yml/badge.svg)](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/backend.yml)
-[![Frontend CI](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/frontend.yml/badge.svg)](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/frontend.yml)
+[![Frontend CI (Admin)](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/frontend-admin.yml/badge.svg)](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/frontend-admin.yml)
+[![Frontend CI (Portal)](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/frontend-portal.yml/badge.svg)](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/frontend-portal.yml)
 [![CodeQL](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/codeql.yml/badge.svg)](https://github.com/DanielvG-IT/OpenCaptive/actions/workflows/codeql.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](#)
 
 </div>
 
@@ -52,8 +53,16 @@ OpenCaptive/
 | Tool        | Version |
 | ----------- | ------- |
 | .NET SDK    | 10.0+   |
-| Node.js     | 20+     |
+| Node.js     | 22+     |
 | npm         | 10+     |
+| Docker      | 24+     |
+
+### Database
+
+```bash
+# Start Postgres (required before running the API)
+docker compose up -d
+```
 
 ### Backend
 
@@ -105,4 +114,4 @@ our [Security Policy](./SECURITY.md).
 
 ## 📄 License
 
-Released under the **MIT License**. See [LICENSE](./LICENSE) for details.
+All rights reserved. License TBD.

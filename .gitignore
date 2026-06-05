@@ -60,6 +60,7 @@ yarn-error.log*
 .env.*.local
 *.pfx
 *.p12
+appsettings.Development.json
 appsettings.*.Local.json
 secrets.json
 
