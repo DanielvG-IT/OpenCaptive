@@ -34,13 +34,17 @@ jobs:
       - name: Prepare artifact directories
         run: mkdir -p artifacts/sbom artifacts/sarif
 
+      - name: Install CycloneDX .NET tool
+        run: dotnet tool install --tool-path ./.tools CycloneDX --version 6.2.0
+
       - name: Generate CycloneDX SBOM
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
-        with:
-          path: src/Backend
-          format: cyclonedx-json
-          output-file: artifacts/sbom/backend.cdx.json
-          upload-artifact: false
+        run: >
+          ./.tools/dotnet-CycloneDX OpenCaptive.slnx
+          --output artifacts/sbom
+          --filename backend.cdx.json
+          --output-format Json
+          --spec-version 1.6
+          --disable-package-restore
 
       - name: Scan SBOM
         id: sca
