@@ -14,9 +14,10 @@ public static class AuthEndpoints
     var group = app.MapGroup("/auth").WithTags("Authentication");
 
     group.MapPost("/login", Login);
+    group.MapPost("/register", Register);
     group.MapPost("/refresh", Refresh);
     // group.MapPost("/verify-mfa", VerifyMfa);
-    // group.MapPost("/register", Register);
+    // group.MapPost("/logout", Logout);
 
     group.MapGet("/me", Me).RequireAuthorization();
 
@@ -44,7 +45,28 @@ public static class AuthEndpoints
     return TypedResults.Ok(result.Value);
   }
 
-  private static async Task<Results<Ok<AuthResponse>, ValidationProblem, ProblemHttpResult>> Refresh(
+  private static async Task<Results<Ok<RegisterResponse>, ValidationProblem, ProblemHttpResult>> Register(
+    [FromBody] RegisterInput input,
+    [FromServices] IValidator<RegisterInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.RegisterAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> Refresh(
     [FromBody] RefreshInput input,
     [FromServices] IValidator<RefreshInput> validator,
     [FromServices] IAuthService service,

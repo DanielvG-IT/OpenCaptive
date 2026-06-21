@@ -19,6 +19,7 @@ public static class ErrorExtensions
     ErrorType.Conflict => StatusCodes.Status409Conflict,
     ErrorType.Forbidden => StatusCodes.Status403Forbidden,
     ErrorType.Unauthorized => StatusCodes.Status401Unauthorized,
+    ErrorType.Failure => StatusCodes.Status500InternalServerError,
     _ => StatusCodes.Status500InternalServerError,
   };
 }
