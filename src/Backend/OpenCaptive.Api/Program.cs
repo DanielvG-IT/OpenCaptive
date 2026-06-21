@@ -1,6 +1,11 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using OpenCaptive.Api.Auth;
 using OpenCaptive.Api.Extensions;
 using OpenCaptive.Application;
 using OpenCaptive.Infrastructure;
+using OpenCaptive.Infrastructure.Options;
 using Serilog;
 
 namespace OpenCaptive.Api;
@@ -17,8 +22,8 @@ public partial class Program
 
             builder.Host.UseSerilog((context, services, configuration) => configuration
                 .ReadFrom.Configuration(context.Configuration)
-                    .ReadFrom.Services(services)
-                    .Enrich.FromLogContext());
+                .ReadFrom.Services(services)
+                .Enrich.FromLogContext());
 
             // TODO: Add OpenTelemetry (tracing + metrics) and immutable audit trail for all mutations (AVG/GDPR, NIS2, ISO 27001, NEN 7510 compliance for all tenants).
             builder.Services.AddOpenApi();
@@ -31,6 +36,41 @@ public partial class Program
 
             builder.Services.AddApplication();
             builder.Services.AddInfrastructure(builder.Configuration);
+
+            builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+            var jwtOptions = builder.Configuration.GetSection("Authentication:Jwt").Get<JwtOptions>()
+                ?? throw new InvalidOperationException("JWT configuration is missing.");
+
+            builder.Services
+                .AddAuthorization()
+                .AddAuthentication(x =>
+                {
+                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = builder.Environment.IsProduction();
+                    options.MapInboundClaims = false;  // keep "sub", "email", "jti" as written
+
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(jwtOptions.SigningKey)),
+
+                        ValidateIssuer = true,
+                        ValidIssuer = jwtOptions.Issuer,
+
+                        ValidateAudience = true,
+                        ValidAudience = jwtOptions.Audience,
+
+                        ValidateLifetime = true,
+
+                        ClockSkew = jwtOptions.ClockSkew
+                    };
+                });
 
             var app = builder.Build();
 
@@ -45,8 +85,11 @@ public partial class Program
             app.UseHttpsRedirection();
             app.UseCors("Default");
 
+            app.UseAuthentication();
+            app.UseAuthorization();
+
             app.MapHealthChecks("/health");
-            app.MapEndpoints();
+            app.MapEndpoints("/api");
 
             app.Run();
         }

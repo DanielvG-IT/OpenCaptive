@@ -1,21 +1,25 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using OpenCaptive.Api.Auth;
 using OpenCaptive.Api.Extensions;
 using OpenCaptive.Application.Organizations;
+using OpenCaptive.Domain.Auth;
 
 namespace OpenCaptive.Api.Endpoints;
 
 public static class OrganizationEndpoints
 {
-  public static void MapOrganizationEndpoints(this IEndpointRouteBuilder app)
+  public static IEndpointRouteBuilder MapOrganizationEndpoints(this IEndpointRouteBuilder app)
   {
     var group = app.MapGroup("/organizations").WithTags("Organizations");
 
     group.MapPost("/", CreateOrganization).WithName("CreateOrganization");
-    group.MapGet("/{id:guid}", GetOrganization).WithName("GetOrganization");
+    group.MapGet("/{id:guid}", GetOrganization).WithName("GetOrganization").RequirePermission(Permissions.Organizations.Read);
     // group.MapPatch("/{id:guid}", UpdateOrganization);
     // group.MapDelete("/{id:guid}", DeleteOrganization);
+
+    return app;
   }
 
   private static async Task<Results<Created<OrganizationDto>, ValidationProblem, ProblemHttpResult>> CreateOrganization(
@@ -25,7 +29,7 @@ public static class OrganizationEndpoints
     CancellationToken cancellationToken)
   {
     var validation = await validator.ValidateAsync(input, cancellationToken);
-    if (validation.IsValid is false)
+    if (!validation.IsValid)
     {
       return TypedResults.ValidationProblem(validation.ToDictionary());
     }
