@@ -1,11 +1,16 @@
 using FluentValidation;
+using OpenCaptive.Application.Auth.Models;
 
-namespace OpenCaptive.Application.Auth;
+namespace OpenCaptive.Application.Auth.Validators;
 
 public sealed class RegisterInputValidator : AbstractValidator<RegisterInput>
 {
   public RegisterInputValidator()
   {
+    RuleFor(x => x.OrganizationName)
+        .NotEmpty()
+        .MaximumLength(200);
+
     RuleFor(x => x.Email)
         .NotEmpty()
         .EmailAddress();

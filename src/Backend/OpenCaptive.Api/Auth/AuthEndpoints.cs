@@ -2,9 +2,10 @@ using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OpenCaptive.Api.Extensions;
-using OpenCaptive.Application.Auth;
+using OpenCaptive.Application.Auth.Contracts;
+using OpenCaptive.Application.Auth.Models;
 
-namespace OpenCaptive.Api.Endpoints;
+namespace OpenCaptive.Api.Auth;
 
 public static class AuthEndpoints
 {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 using OpenCaptive.Domain.Auth;
 using OpenCaptive.Domain.Organizations;
 
-namespace OpenCaptive.Api.Auth;
+namespace OpenCaptive.Api.Authorization;
 
 public sealed class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {

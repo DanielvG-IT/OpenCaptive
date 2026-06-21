@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace OpenCaptive.Api.Auth;
+namespace OpenCaptive.Api.Authorization;
 
 public static class EndpointAuthorizationExtensions
 {

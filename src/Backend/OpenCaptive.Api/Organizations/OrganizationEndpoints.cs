@@ -1,12 +1,13 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using OpenCaptive.Api.Auth;
+using OpenCaptive.Api.Authorization;
 using OpenCaptive.Api.Extensions;
-using OpenCaptive.Application.Organizations;
+using OpenCaptive.Application.Organizations.Contracts;
+using OpenCaptive.Application.Organizations.Models;
 using OpenCaptive.Domain.Auth;
 
-namespace OpenCaptive.Api.Endpoints;
+namespace OpenCaptive.Api.Organizations;
 
 public static class OrganizationEndpoints
 {
@@ -56,14 +57,4 @@ public static class OrganizationEndpoints
 
     return TypedResults.Ok(result.Value);
   }
-
-  // private static IResult UpdateOrganization(Guid id)
-  // {
-  //   return Results.Ok();
-  // }
-
-  // private static IResult DeleteOrganization(Guid id)
-  // {
-  //   return Results.NoContent();
-  // }
 }

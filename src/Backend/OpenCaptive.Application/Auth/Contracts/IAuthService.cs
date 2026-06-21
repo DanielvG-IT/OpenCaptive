@@ -1,6 +1,7 @@
+using OpenCaptive.Application.Auth.Models;
 using OpenCaptive.Application.Common;
 
-namespace OpenCaptive.Application.Auth;
+namespace OpenCaptive.Application.Auth.Contracts;
 
 public interface IAuthService
 {

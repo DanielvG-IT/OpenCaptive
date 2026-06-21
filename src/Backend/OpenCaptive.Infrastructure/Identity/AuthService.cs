@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using OpenCaptive.Application.Auth;
+using OpenCaptive.Application.Auth.Contracts;
+using OpenCaptive.Application.Auth.Errors;
+using OpenCaptive.Application.Auth.Models;
 using OpenCaptive.Application.Common;
 using OpenCaptive.Domain.Auth;
 using OpenCaptive.Infrastructure.Options;
@@ -31,6 +33,11 @@ public sealed class AuthService(
 
   public async Task<Result<LoginResponse>> LoginAsync(LoginInput input, CancellationToken cancellationToken = default)
   {
+    if (string.IsNullOrWhiteSpace(input.Email) || string.IsNullOrWhiteSpace(input.Password))
+    {
+      return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
+    }
+
     // TODO(security, deferred): No brute-force lockout. UserManager.CheckPasswordAsync does not
     // track failed attempts — that's SignInManager/CheckPasswordSignInAsync behavior. Nothing
     // currently throttles password guessing against a known email. Wire up Identity lockout
@@ -41,19 +48,23 @@ public sealed class AuthService(
     // always running PBKDF2 — verify input.Password against a precomputed dummy hash from
     // _userManager.PasswordHasher (a new ApplicationUser with null PasswordHash will NOT do this).
     var user = await _userManager.FindByEmailAsync(input.Email);
-    if (user is null || !await _userManager.CheckPasswordAsync(user, input.Password) || string.IsNullOrWhiteSpace(user.Email) || !user.IsActive)
+    if (user is null || !user.IsActive)
     {
       return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
     }
 
-    if (!user.EmailConfirmed)
+    if (!await _userManager.CheckPasswordAsync(user, input.Password))
+    {
+      return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
+    }
+
+    if (!await _userManager.IsEmailConfirmedAsync(user))
     {
       // TODO: Email verification flow
-      // await SendVerificationEmail();
       return Result.Success(new LoginResponse(LoginStatus.EmailVerificationRequired, null, null));
     }
 
-    if (user.TwoFactorEnabled)
+    if (await _userManager.GetTwoFactorEnabledAsync(user))
     {
       // TODO: MFA challenge flow
       return Result.Success(new LoginResponse(LoginStatus.MfaRequired, null, "challengeCode"));
@@ -165,7 +176,7 @@ public sealed class AuthService(
     var now = DateTimeOffset.UtcNow;
 
     // Single-org for now: relax to per-request org selection when multi-org lands.
-    var membership = await _dbContext.OrganizationMemberships      .SingleOrDefaultAsync(x => x.UserId == user.Id, cancellationToken);
+    var membership = await _dbContext.OrganizationMemberships.SingleOrDefaultAsync(x => x.UserId == user.Id, cancellationToken);
 
     var accessToken = _accessTokenGenerator.Generate(new AccessTokenRequest(user.Id, user.Email!, membership?.OrganizationId, membership?.Role));
 

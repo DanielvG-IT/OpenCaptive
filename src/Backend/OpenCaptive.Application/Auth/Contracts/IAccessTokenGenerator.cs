@@ -1,4 +1,6 @@
-namespace OpenCaptive.Application.Auth;
+using OpenCaptive.Application.Auth.Models;
+
+namespace OpenCaptive.Application.Auth.Contracts;
 
 public interface IAccessTokenGenerator
 {

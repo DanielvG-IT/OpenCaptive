@@ -1,6 +1,6 @@
 using OpenCaptive.Application.Common;
 
-namespace OpenCaptive.Application.Organizations;
+namespace OpenCaptive.Application.Organizations.Errors;
 
 public static class OrganizationErrors
 {

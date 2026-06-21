@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
-using OpenCaptive.Application.Auth;
+using OpenCaptive.Application.Auth.Contracts;
 
 namespace OpenCaptive.Infrastructure.Identity;
 

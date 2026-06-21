@@ -1,5 +1,6 @@
 using System.Reflection;
-using OpenCaptive.Api.Endpoints;
+using OpenCaptive.Api.Auth;
+using OpenCaptive.Api.Organizations;
 
 namespace OpenCaptive.Api.Extensions;
 

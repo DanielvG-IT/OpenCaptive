@@ -1,4 +1,4 @@
-namespace OpenCaptive.Application.Auth;
+namespace OpenCaptive.Application.Auth.Contracts;
 
 public interface ITokenHasher
 {

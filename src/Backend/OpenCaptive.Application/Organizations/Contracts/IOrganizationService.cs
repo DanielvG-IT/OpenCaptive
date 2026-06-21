@@ -1,6 +1,7 @@
 using OpenCaptive.Application.Common;
+using OpenCaptive.Application.Organizations.Models;
 
-namespace OpenCaptive.Application.Organizations;
+namespace OpenCaptive.Application.Organizations.Contracts;
 
 public interface IOrganizationService
 {

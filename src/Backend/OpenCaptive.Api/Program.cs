@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using OpenCaptive.Api.Auth;
+using OpenCaptive.Api.Authorization;
 using OpenCaptive.Api.Extensions;
 using OpenCaptive.Application;
 using OpenCaptive.Infrastructure;
