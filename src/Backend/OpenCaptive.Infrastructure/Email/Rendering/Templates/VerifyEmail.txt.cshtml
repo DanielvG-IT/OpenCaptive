@@ -1,0 +1,16 @@
+@using OpenCaptive.Application.Email.Models
+@model VerifyEmailTemplateModel
+OpenCaptive
+
+Hi @Model.RecipientEmail,
+
+Welcome to OpenCaptive. Please verify your email address to complete your registration and unlock full access to your organization.
+
+Verify your email address:
+@Model.VerificationUrl
+
+This link will expire in @Model.TokenLifetime.TotalHours hours.
+
+If you did not create an account using this email address, you can ignore this email or contact support if you have concerns.
+
+© @DateTime.UtcNow.Year OpenCaptive. All rights reserved.
