@@ -2,13 +2,12 @@ using Microsoft.Extensions.Options;
 using OpenCaptive.Application.Auth.Contracts;
 using OpenCaptive.Application.Auth.Models;
 using OpenCaptive.Domain.Auth;
-using OpenCaptive.Infrastructure.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
 
-namespace OpenCaptive.Infrastructure.Identity;
+namespace OpenCaptive.Infrastructure.Auth;
 
 public sealed class JwtAccessTokenGenerator(IOptions<JwtOptions> jwtOptions) : IAccessTokenGenerator
 {

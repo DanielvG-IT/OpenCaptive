@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace OpenCaptive.Infrastructure.Identity;
+namespace OpenCaptive.Infrastructure.Auth;
 
 public sealed class ApplicationUser : IdentityUser<Guid>
 {

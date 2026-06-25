@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OpenCaptive.Domain.Organizations;
-using OpenCaptive.Infrastructure.Identity;
+using OpenCaptive.Infrastructure.Auth;
 
 namespace OpenCaptive.Infrastructure.Persistence.Configurations;
 

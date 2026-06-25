@@ -5,7 +5,7 @@ using OpenCaptive.Api.Authorization;
 using OpenCaptive.Api.Extensions;
 using OpenCaptive.Application;
 using OpenCaptive.Infrastructure;
-using OpenCaptive.Infrastructure.Options;
+using OpenCaptive.Infrastructure.Auth;
 using Serilog;
 
 namespace OpenCaptive.Api;
@@ -39,8 +39,7 @@ public partial class Program
 
             builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-            var jwtOptions = builder.Configuration.GetSection("Authentication:Jwt").Get<JwtOptions>()
-                ?? throw new InvalidOperationException("JWT configuration is missing.");
+            var jwtOptions = builder.Configuration.GetSection("Authentication:Jwt").Get<JwtOptions>() ?? throw new InvalidOperationException("JWT configuration is missing.");
 
             builder.Services
                 .AddAuthorization()

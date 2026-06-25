@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using OpenCaptive.Application.Auth.Contracts;
 
-namespace OpenCaptive.Infrastructure.Identity;
+namespace OpenCaptive.Infrastructure.Auth;
 
 public sealed class Sha256TokenHasher : ITokenHasher
 {

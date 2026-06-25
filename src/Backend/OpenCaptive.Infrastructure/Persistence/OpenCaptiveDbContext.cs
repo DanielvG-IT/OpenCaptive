@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using OpenCaptive.Domain.Auth;
 using OpenCaptive.Domain.Common;
 using OpenCaptive.Domain.Organizations;
-using OpenCaptive.Infrastructure.Identity;
+using OpenCaptive.Infrastructure.Auth;
 
 namespace OpenCaptive.Infrastructure.Persistence;
 
