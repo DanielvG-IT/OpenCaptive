@@ -1,21 +1,29 @@
 version: 2
 updates:
+  # DO NOT REORDER: Dependabot matches top-down. Catch-alls must remain at the bottom.
+
   # ---- GitHub Actions ------------------------------------------------------
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     labels:
       - "dependencies"
       - "ci"
     commit-message:
       prefix: "ci"
+    groups:
+      actions-all:
+        patterns:
+          - "*"
 
-  # ---- .NET (NuGet) --------------------------------------------------------
+  # ---- Backend: .NET (NuGet) -----------------------------------------------
   - package-ecosystem: "nuget"
-    directory: "/"
+    directory: "/src/Backend"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
@@ -23,16 +31,29 @@ updates:
     commit-message:
       prefix: "chore"
     groups:
-      microsoft:
+      database-drivers:
         patterns:
-          - "Microsoft.*"
+          - "Microsoft.EntityFrameworkCore.*"
+          - "Npgsql.EntityFrameworkCore.PostgreSQL"
+          - "Npgsql"
+      microsoft-web:
+        patterns:
+          - "Microsoft.AspNetCore.*"
+          - "Microsoft.Extensions.*"
           - "System.*"
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # ---- Frontend: admin (npm) ----------------------------------------------
+  # ---- Frontend: Admin (npm) ----------------------------------------------
   - package-ecosystem: "npm"
     directory: "/src/Frontend/apps/admin"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
@@ -40,22 +61,33 @@ updates:
     commit-message:
       prefix: "chore"
     groups:
-      next:
+      next-react-core:
         patterns:
           - "next"
           - "eslint-config-next"
-      react:
-        patterns:
           - "react"
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
+      dev-tooling:
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier"
+          - "typescript"
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # ---- Frontend: portal (npm) ---------------------------------------------
+  # ---- Frontend: Portal (npm) ---------------------------------------------
   - package-ecosystem: "npm"
     directory: "/src/Frontend/apps/portal"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
     labels:
       - "dependencies"
@@ -63,13 +95,23 @@ updates:
     commit-message:
       prefix: "chore"
     groups:
-      next:
+      next-react-core:
         patterns:
           - "next"
           - "eslint-config-next"
-      react:
-        patterns:
           - "react"
           - "react-dom"
           - "@types/react"
           - "@types/react-dom"
+      dev-tooling:
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "prettier"
+          - "typescript"
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
