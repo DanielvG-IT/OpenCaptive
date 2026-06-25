@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -11,83 +10,85 @@ using OpenCaptive.Application.Auth.Contracts;
 using OpenCaptive.Application.Auth.Errors;
 using OpenCaptive.Application.Auth.Models;
 using OpenCaptive.Application.Common;
-using OpenCaptive.Application.Email;
+using OpenCaptive.Application.Email.Contracts;
+using OpenCaptive.Application.Email.Models;
 using OpenCaptive.Application.Organizations.Errors;
 using OpenCaptive.Domain.Auth;
 using OpenCaptive.Domain.Organizations;
-using OpenCaptive.Infrastructure.Options;
+using OpenCaptive.Infrastructure.Auth;
 using OpenCaptive.Infrastructure.Persistence;
 
-namespace OpenCaptive.Infrastructure.Identity;
+namespace OpenCaptive.Infrastructure.Auth;
 
 public sealed class AuthService(
     ITokenHasher tokenHasher,
     ILogger<AuthService> logger,
     OpenCaptiveDbContext dbContext,
+    IFrontendLinkFactory frontendLinkFactory,
     UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
     ITransactionalEmailProvider emailProvider,
     IAccessTokenGenerator accessTokenGenerator,
-    IOptions<RefreshTokenOptions> refreshTokenOptions
-) : IAuthService
+    IEmailTemplateRenderer emailTemplateRenderer,
+    IOptions<RefreshTokenOptions> refreshTokenOptions,
+    IOptions<EmailVerificationOptions> emailVerificationOptions
+    ) : IAuthService
 {
   private readonly ILogger<AuthService> _logger = logger;
   private readonly ITokenHasher _tokenHasher = tokenHasher;
   private readonly OpenCaptiveDbContext _dbContext = dbContext;
   private readonly UserManager<ApplicationUser> _userManager = userManager;
+  private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
   private readonly ITransactionalEmailProvider _emailProvider = emailProvider;
   private readonly IAccessTokenGenerator _accessTokenGenerator = accessTokenGenerator;
+  private readonly IEmailTemplateRenderer _emailTemplateRenderer = emailTemplateRenderer;
+  private readonly IFrontendLinkFactory _frontendLinkFactory = frontendLinkFactory;
 
   // TODO(security, deferred): No absolute session lifetime — every refresh resets this 30-day
   // window, so an actively-refreshed session never expires. Decide whether to cap total session
   // age (would need an "issued/family-created at" timestamp that survives rotation).
-  private readonly TimeSpan RefreshTokenLifetime = refreshTokenOptions.Value.Lifetime;
+  private readonly RefreshTokenOptions _refreshTokenOptions = refreshTokenOptions.Value;
+  private readonly EmailVerificationOptions _emailVerificationOptions = emailVerificationOptions.Value;
 
   public async Task<Result<LoginResponse>> LoginAsync(LoginInput input, CancellationToken cancellationToken = default)
   {
-    // TODO(security, deferred): No brute-force lockout. UserManager.CheckPasswordAsync does not
-    // track failed attempts — that's SignInManager/CheckPasswordSignInAsync behavior. Nothing
-    // currently throttles password guessing against a known email. Wire up Identity lockout
-    // (AccessFailedAsync + IsLockedOutAsync, or switch to CheckPasswordSignInAsync) and/or
-    // add rate limiting on /auth/login.
-    // TODO(security, deferred): User-enumeration timing oracle. The null-user path skips
-    // password hashing, so real accounts respond measurably slower than fake ones. Mitigate by
-    // always running PBKDF2 — verify input.Password against a precomputed dummy hash from
-    // _userManager.PasswordHasher (a new ApplicationUser with null PasswordHash will NOT do this).
     var user = await _userManager.FindByEmailAsync(input.Email);
+
     if (user is null || !user.IsActive)
     {
+      // TODO: Timing oracle mitigation: Always compute a hash to equalize response times
       return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
     }
 
-    if (!await _userManager.CheckPasswordAsync(user, input.Password))
+    var signInResult = await _signInManager.CheckPasswordSignInAsync(user, input.Password, lockoutOnFailure: true);
+
+    if (signInResult.IsLockedOut)
     {
-      return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
+      return Result.Success(new LoginResponse(LoginStatus.AccountLocked, null, null));
     }
 
-    if (!await _userManager.IsEmailConfirmedAsync(user))
+    if (signInResult.IsNotAllowed && !await _userManager.IsEmailConfirmedAsync(user))
     {
-      // TODO: Email verification flow
       return Result.Success(new LoginResponse(LoginStatus.EmailVerificationRequired, null, null));
+    }
+
+    if (!signInResult.Succeeded)
+    {
+      return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
     }
 
     if (await _userManager.GetTwoFactorEnabledAsync(user))
     {
-      // TODO: MFA challenge flow
       return Result.Success(new LoginResponse(LoginStatus.MfaRequired, null, "challengeCode"));
     }
 
     var tokens = await GenerateTokensAsync(user, Guid.CreateVersion7(), cancellationToken);
-
     await MarkUserAuthenticatedAsync(user);
 
     return Result.Success(
         new LoginResponse(
             LoginStatus.Success,
-            new TokenResponse(
-                tokens.AccessToken,
-                tokens.AccessTokenExpiresAt,
-                tokens.RefreshToken,
-                tokens.RefreshTokenExpiresAt),
+            new TokenResponse(tokens.AccessToken, tokens.AccessTokenExpiresAt, tokens.RefreshToken, tokens.RefreshTokenExpiresAt),
             null));
   }
 
@@ -97,12 +98,6 @@ public sealed class AuthService(
     if (existingUser is not null)
     {
       return Result.Failure<RegisterResponse>(AuthErrors.UserAlreadyExists);
-    }
-
-    var slugExists = await _dbContext.Organizations.AnyAsync(o => o.Slug == input.OrganizationSlug, cancellationToken);
-    if (slugExists)
-    {
-      return Result.Failure<RegisterResponse>(OrganizationErrors.SlugAlreadyExists(input.OrganizationSlug));
     }
 
     try
@@ -127,8 +122,8 @@ public sealed class AuthService(
 
       await transaction.CommitAsync(cancellationToken);
 
-      var verificationEmailSend = await SendVerificationEmail(newUser, cancellationToken);
-      return Result.Success(new RegisterResponse(verificationEmailSend));
+      var isVerificationEmailSent = await SendVerificationEmail(newUser, cancellationToken);
+      return Result.Success(new RegisterResponse(isVerificationEmailSent));
     }
     catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == PostgresErrorCodes.UniqueViolation)
     {
@@ -136,37 +131,23 @@ public sealed class AuthService(
     }
   }
 
-  // public Task<Result<LoginResponse>> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default)
-  // {
-  //   throw new NotImplementedException();
-  // }
-
-  public Task<Result<TokenResponse>> VerifyMfaAsync(VerifyMfaInput input, CancellationToken cancellationToken = default)
-  {
-    throw new NotImplementedException();
-  }
-
   public async Task<Result<TokenResponse>> RefreshAsync(RefreshInput input, CancellationToken cancellationToken = default)
   {
     var refreshTokenHash = _tokenHasher.Hash(input.RefreshToken);
+    var now = DateTimeOffset.UtcNow;
 
-    // TODO(security, deferred): Concurrency race. Two parallel refreshes with the same token can
-    // both pass IsActive before either revokes, yielding two valid token chains from one token.
-    // Needs a conditional/atomic revoke (concurrency token or UPDATE ... WHERE RevokedAt IS NULL).
     var refreshToken = await _dbContext.RefreshTokens.SingleOrDefaultAsync(x => x.TokenHash == refreshTokenHash, cancellationToken);
     if (refreshToken is null || refreshToken.IsExpired)
     {
       return Result.Failure<TokenResponse>(AuthErrors.InvalidRefreshToken);
     }
 
-    // Refresh token reuse detection (OAuth BCP). 
-    // Revoke the entire token family and force re-auth, rather than failing silently here.
+    // Family revocation detection
     if (refreshToken.IsRevoked)
     {
-      var now = DateTimeOffset.UtcNow;
       await _dbContext.RefreshTokens
-        .Where(x => x.UserId == refreshToken.UserId && x.FamilyId == refreshToken.FamilyId && x.RevokedAt == null)
-        .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, now), cancellationToken);
+          .Where(x => x.UserId == refreshToken.UserId && x.FamilyId == refreshToken.FamilyId && x.RevokedAt == null)
+          .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, now), cancellationToken);
 
       return Result.Failure<TokenResponse>(AuthErrors.InvalidRefreshToken);
     }
@@ -177,17 +158,28 @@ public sealed class AuthService(
       return Result.Failure<TokenResponse>(AuthErrors.InvalidRefreshToken);
     }
 
-    refreshToken.Revoke();
-    _dbContext.RefreshTokens.Update(refreshToken);
+    var securityStamp = await _userManager.GetSecurityStampAsync(user);
+    if (!string.Equals(refreshToken.SecurityStamp, securityStamp, StringComparison.Ordinal))
+    {
+      return Result.Failure<TokenResponse>(AuthErrors.InvalidRefreshToken);
+    }
+
+    var rowsAffected = await _dbContext.RefreshTokens
+        .Where(x => x.Id == refreshToken.Id && x.RevokedAt == null)
+        .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, now), cancellationToken);
+
+    if (rowsAffected == 0)
+    {
+      await _dbContext.RefreshTokens
+          .Where(x => x.UserId == refreshToken.UserId && x.FamilyId == refreshToken.FamilyId && x.RevokedAt == null)
+          .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, now), cancellationToken);
+
+      return Result.Failure<TokenResponse>(AuthErrors.InvalidRefreshToken);
+    }
 
     var tokens = await GenerateTokensAsync(user, refreshToken.FamilyId, cancellationToken);
 
-    return Result.Success(
-        new TokenResponse(
-            tokens.AccessToken,
-            tokens.AccessTokenExpiresAt,
-            tokens.RefreshToken,
-            tokens.RefreshTokenExpiresAt));
+    return Result.Success(new TokenResponse(tokens.AccessToken, tokens.AccessTokenExpiresAt, tokens.RefreshToken, tokens.RefreshTokenExpiresAt));
   }
 
   public async Task<Result<MeResponse>> MeAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -201,32 +193,34 @@ public sealed class AuthService(
     return Result.Success(new MeResponse(user.Id, user.Email, user.EmailConfirmed, user.TwoFactorEnabled));
   }
 
+  public Task<Result<TokenResponse>> VerifyMfaAsync(VerifyMfaInput input, CancellationToken cancellationToken = default)
+  {
+    throw new NotImplementedException();
+  }
+
 
   // ===== Helpers ======
   private async Task<bool> SendVerificationEmail(ApplicationUser user, CancellationToken cancellationToken)
   {
     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
     var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-
-    var callbackUrl = $"https://localhost:3000/verify-email?userId={user.Id}&token={encodedToken}"; // TODO: replace with actual url when i have better options
-    var subject = "Please verify your email address";
-
-    var htmlBody = $@"
-        <h2>Welcome to our platform!</h2>
-        <p>Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.</p>
-        <p>If the link doesn't work, copy and paste this URL into your browser:</p>
-        <p>{callbackUrl}</p>";
-
-    var textBody = $"Welcome! Please confirm your account by visiting this URL: {callbackUrl}";
-
-    var email = new TransactionalEmail(
-      To: user.Email!,
-      Subject: subject,
-      HtmlBody: htmlBody,
-      TextBody: textBody);
+    var verificationUrl = _frontendLinkFactory.CreateVerifyEmailLink(user.Id, encodedToken);
 
     try
     {
+      var emailBodies = await _emailTemplateRenderer.RenderAsync(
+          "VerifyEmail",
+          new VerifyEmailTemplateModel(user.Email!, verificationUrl, _emailVerificationOptions.TokenLifetime),
+          cancellationToken);
+
+      var email = new TransactionalEmail(
+          ToAddress: user.Email!,
+          ToName: user.UserName,
+          Subject: "OpenCaptive email verification",
+          HtmlBody: emailBodies.HtmlBody,
+          TextBody: emailBodies.TextBody
+      );
+
       await _emailProvider.SendAsync(email, cancellationToken);
       return true;
     }
@@ -239,8 +233,11 @@ public sealed class AuthService(
 
   private async Task MarkUserAuthenticatedAsync(ApplicationUser user)
   {
-    user.LastLoginAt = DateTimeOffset.UtcNow;
-    await _userManager.UpdateAsync(user);
+    var lastLoginAt = DateTimeOffset.UtcNow;
+
+    await _dbContext.Users
+      .Where(x => x.Id == user.Id)
+      .ExecuteUpdateAsync(s => s.SetProperty(x => x.LastLoginAt, lastLoginAt));
   }
 
   private static string GenerateRefreshTokenValue()
@@ -254,16 +251,15 @@ public sealed class AuthService(
   {
     var now = DateTimeOffset.UtcNow;
 
-    // Single-org for now: relax to per-request org selection when multi-org lands.
     var membership = await _dbContext.OrganizationMemberships.SingleOrDefaultAsync(x => x.UserId == user.Id, cancellationToken);
 
     var accessToken = _accessTokenGenerator.Generate(new AccessTokenRequest(user.Id, user.Email!, membership?.OrganizationId, membership?.Role));
 
-    var refreshTokenExpiresAt = now.Add(RefreshTokenLifetime);
+    var refreshTokenExpiresAt = now.Add(_refreshTokenOptions.Lifetime);
     var rawRefreshToken = GenerateRefreshTokenValue();
+    var securityStamp = await _userManager.GetSecurityStampAsync(user);
 
-    _dbContext.RefreshTokens.Add(RefreshToken.Create(user.Id, _tokenHasher.Hash(rawRefreshToken), refreshTokenExpiresAt, familyId));
-
+    _dbContext.RefreshTokens.Add(RefreshToken.Create(user.Id, _tokenHasher.Hash(rawRefreshToken), securityStamp, refreshTokenExpiresAt, familyId));
     await _dbContext.SaveChangesAsync(cancellationToken);
 
     return new TokenResponse(

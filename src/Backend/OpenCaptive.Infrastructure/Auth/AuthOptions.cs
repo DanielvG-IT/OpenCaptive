@@ -1,4 +1,4 @@
-namespace OpenCaptive.Infrastructure.Options;
+namespace OpenCaptive.Infrastructure.Auth;
 
 public sealed class JwtOptions
 {
@@ -12,4 +12,19 @@ public sealed class JwtOptions
 public sealed class RefreshTokenOptions
 {
   public TimeSpan Lifetime { get; init; }
+}
+
+public sealed class EmailVerificationOptions
+{
+  public TimeSpan TokenLifetime { get; init; }
+}
+
+public sealed class PasswordResetOptions
+{
+  public TimeSpan TokenLifetime { get; init; }
+}
+
+public sealed class TwoFactorAuthenticationOptions
+{
+  public string AuthenticatorIssuer { get; init; } = "OpenCaptive";
 }

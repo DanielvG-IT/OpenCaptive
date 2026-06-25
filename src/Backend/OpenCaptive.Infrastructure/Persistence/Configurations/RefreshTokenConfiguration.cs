@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using OpenCaptive.Domain.Auth;
-using OpenCaptive.Infrastructure.Identity;
+using OpenCaptive.Infrastructure.Auth;
 
 namespace OpenCaptive.Infrastructure.Persistence.Configurations;
 
@@ -17,6 +17,10 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
     builder.Property(x => x.TokenHash)
       .IsRequired()
       .HasMaxLength(64);
+
+    builder.Property(x => x.SecurityStamp)
+      .IsRequired()
+      .HasMaxLength(256);
 
     builder.HasIndex(x => x.TokenHash)
       .IsUnique();
