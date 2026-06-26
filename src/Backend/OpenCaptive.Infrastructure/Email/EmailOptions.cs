@@ -1,8 +1,10 @@
+using OpenCaptive.Infrastructure.Common.Options;
+
 namespace OpenCaptive.Infrastructure.Email;
 
-public sealed class EmailOptions
+public sealed class EmailOptions : IOptionsSection
 {
-  public const string SectionName = "Email";
+  public static string SectionName { get; } = "Email";
 
   public required EmailFromOptions From { get; init; }
 
