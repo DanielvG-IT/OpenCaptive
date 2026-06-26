@@ -2,17 +2,31 @@ namespace OpenCaptive.Infrastructure.Email;
 
 public sealed class EmailOptions
 {
-  public string FromAddress { get; init; } = string.Empty;
-  public string FromName { get; init; } = string.Empty;
-  public SMTPEmailOptions SMTP { get; init; } = new();
-  public TimeSpan Timeout { get; init; } = default;
+  public const string SectionName = "Email";
+
+  public required EmailFromOptions From { get; init; }
+
+  public required SmtpOptions Smtp { get; init; }
 }
 
-public sealed class SMTPEmailOptions
+public sealed class EmailFromOptions
 {
-  public string Host { get; init; } = string.Empty;
-  public int Port { get; init; } = default;
-  public string Username { get; init; } = string.Empty;
-  public string Password { get; init; } = string.Empty;
-  public bool EnableSsl { get; init; } = true;
+  public required string Name { get; init; }
+
+  public required string Address { get; init; }
+}
+
+public sealed class SmtpOptions
+{
+  public required string Host { get; init; }
+
+  public int Port { get; init; }
+
+  public string? Username { get; init; }
+
+  public string? Password { get; init; }
+
+  public bool EnableSsl { get; init; }
+
+  public TimeSpan Timeout { get; init; }
 }

@@ -22,7 +22,7 @@ public sealed class SmtpTransactionalEmailProvider(IOptions<EmailOptions> emailO
 
     var message = new MimeMessage();
 
-    message.From.Add(new MailboxAddress(_emailOptions.FromName, _emailOptions.FromAddress));
+    message.From.Add(new MailboxAddress(_emailOptions.From.Name, _emailOptions.From.Address));
     message.To.Add(new MailboxAddress(email.ToName, email.ToAddress));
     message.Subject = email.Subject ?? throw new ArgumentException("Email subject cannot be null.", nameof(email));
     message.Body = new BodyBuilder
@@ -32,16 +32,16 @@ public sealed class SmtpTransactionalEmailProvider(IOptions<EmailOptions> emailO
     }.ToMessageBody();
 
     // Use StartTls to prevent downgrade attacks
-    var sslMode = _emailOptions.SMTP.EnableSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
+    var sslMode = _emailOptions.Smtp.EnableSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
 
     using var smtp = new SmtpClient();
-    smtp.Timeout = (int)_emailOptions.Timeout.TotalMilliseconds;
+    smtp.Timeout = (int)_emailOptions.Smtp.Timeout.TotalMilliseconds;
 
-    await smtp.ConnectAsync(_emailOptions.SMTP.Host, _emailOptions.SMTP.Port, sslMode, cancellationToken);
+    await smtp.ConnectAsync(_emailOptions.Smtp.Host, _emailOptions.Smtp.Port, sslMode, cancellationToken);
 
-    if (!string.IsNullOrWhiteSpace(_emailOptions.SMTP.Username) && !string.IsNullOrWhiteSpace(_emailOptions.SMTP.Password))
+    if (!string.IsNullOrWhiteSpace(_emailOptions.Smtp.Username) && !string.IsNullOrWhiteSpace(_emailOptions.Smtp.Password))
     {
-      await smtp.AuthenticateAsync(_emailOptions.SMTP.Username, _emailOptions.SMTP.Password, cancellationToken);
+      await smtp.AuthenticateAsync(_emailOptions.Smtp.Username, _emailOptions.Smtp.Password, cancellationToken);
     }
 
     await smtp.SendAsync(message, cancellationToken);

@@ -20,9 +20,9 @@ public sealed class FrontendLinkFactory(IOptions<FrontendOptions> options) : IFr
 
   public string CreateVerifyEmailLink(Guid userId, string token)
   {
-    var builder = new UriBuilder(_options.BaseUrl)
+    var builder = new UriBuilder(_options.ApplicationUrl)
     {
-      Path = FrontendOptions.VerifyEmailPath
+      Path = FrontendRoutes.VerifyEmail
     };
 
     return QueryHelpers.AddQueryString(
