@@ -1,0 +1,23 @@
+@using OpenCaptive.Application.Email.Models
+@model PasswordResetTemplateModel
+@{
+    var hours = (int)Math.Round(Model.TokenLifetime.TotalHours);
+}
+Reset your password
+
+Hi @Model.RecipientFirstName,
+
+We received a request to reset the password for your OpenCaptive account. Choose a new password by opening the link below:
+
+@Raw(Model.ResetUrl)
+
+This link expires in @hours hours and can only be used once.
+
+Didn't request this? If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged until you create a new one.
+
+--
+You received this email because a password reset was requested for your OpenCaptive account.
+Need help? @Raw(ViewBag.SupportUrl)
+@Raw(ViewBag.WebsiteUrl)
+
+(c) @DateTime.UtcNow.Year @ViewBag.BrandName. All rights reserved.
