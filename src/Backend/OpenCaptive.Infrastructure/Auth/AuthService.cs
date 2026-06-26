@@ -104,18 +104,26 @@ public sealed class AuthService(
     {
       await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
 
+      // Creating Organization
       var newOrg = Organization.Create(input.OrganizationName, input.OrganizationSlug);
       _dbContext.Organizations.Add(newOrg);
       await _dbContext.SaveChangesAsync(cancellationToken);
 
-      var newUser = new ApplicationUser { UserName = input.Email, Email = input.Email };
+      // Creating User
+      var newUser = new ApplicationUser
+      {
+        FirstName = input.FirstName,
+        LastName = input.LastName,
+        UserName = input.Email,
+        Email = input.Email
+      };
       var createUserResult = await _userManager.CreateAsync(newUser, input.Password);
-
       if (!createUserResult.Succeeded)
       {
         return Result.Failure<RegisterResponse>(AuthErrors.UserCreationFailed);
       }
 
+      // Creating Org<->User relationship
       var newMembership = OrganizationMembership.Create(newUser.Id, newOrg.Id, OrganizationRole.Owner);
       _dbContext.OrganizationMemberships.Add(newMembership);
       await _dbContext.SaveChangesAsync(cancellationToken);
@@ -190,7 +198,7 @@ public sealed class AuthService(
       return Result.Failure<MeResponse>(AuthErrors.UserNotFound);
     }
 
-    return Result.Success(new MeResponse(user.Id, user.Email, user.EmailConfirmed, user.TwoFactorEnabled));
+    return Result.Success(new MeResponse(user.Id, user.Email, user.FirstName, user.LastName, user.EmailConfirmed, user.TwoFactorEnabled));
   }
 
   public Task<Result<TokenResponse>> VerifyMfaAsync(VerifyMfaInput input, CancellationToken cancellationToken = default)
@@ -215,7 +223,7 @@ public sealed class AuthService(
 
       var email = new TransactionalEmail(
           ToAddress: user.Email!,
-          ToName: user.UserName,
+          ToName: user.FirstName,
           Subject: "OpenCaptive email verification",
           HtmlBody: emailBodies.HtmlBody,
           TextBody: emailBodies.TextBody

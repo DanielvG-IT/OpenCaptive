@@ -17,6 +17,15 @@ public sealed class OpenCaptiveDbContext(DbContextOptions<OpenCaptiveDbContext> 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     base.OnModelCreating(modelBuilder);
+
+    modelBuilder.Entity<ApplicationUser>().Property(x => x.FirstName)
+        .HasMaxLength(100)
+        .IsRequired();
+
+    modelBuilder.Entity<ApplicationUser>().Property(x => x.LastName)
+        .HasMaxLength(100)
+        .IsRequired();
+
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(OpenCaptiveDbContext).Assembly);
   }
 
