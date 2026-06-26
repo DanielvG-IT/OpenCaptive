@@ -5,6 +5,10 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>fdd192fe-7ef8-45c2-9829-ef9ca068b9fd</UserSecretsId>
+
+    <!-- RazorLight compiles email templates at runtime and resolves metadata references from the
+         entry assembly's dependency context, so the compilation context must be preserved. -->
+    <PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <PropertyGroup>
