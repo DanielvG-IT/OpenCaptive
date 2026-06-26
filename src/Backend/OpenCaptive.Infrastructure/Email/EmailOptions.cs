@@ -9,6 +9,17 @@ public sealed class EmailOptions : IOptionsSection
   public required EmailFromOptions From { get; init; }
 
   public required SmtpOptions Smtp { get; init; }
+
+  public EmailBrandingOptions Branding { get; init; } = new();
+}
+
+public sealed class EmailBrandingOptions
+{
+  public string BrandName { get; init; } = "OpenCaptive";
+
+  public string WebsiteUrl { get; init; } = "https://opencaptive.com";
+
+  public string SupportUrl { get; init; } = "https://opencaptive.com/support";
 }
 
 public sealed class EmailFromOptions

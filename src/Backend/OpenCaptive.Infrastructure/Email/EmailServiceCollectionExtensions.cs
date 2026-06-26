@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenCaptive.Application.Email.Contracts;
-using OpenCaptive.Infrastructure.Email.Rendering;
 using RazorLight;
 
 namespace OpenCaptive.Infrastructure.Email;
@@ -18,13 +17,12 @@ public static class EmailServiceCollectionExtensions
 
     services.AddSingleton<IRazorLightEngine>(_ =>
     {
-      var assembly =
-              typeof(RazorEmailTemplateRenderer).Assembly;
+      var assembly = typeof(RazorEmailTemplateRenderer).Assembly;
 
       return new RazorLightEngineBuilder()
-              .UseEmbeddedResourcesProject(assembly, "OpenCaptive.Infrastructure.Email.Rendering.Templates")
-              .UseMemoryCachingProvider()
-              .Build();
+          .UseProject(new EmbeddedEmailTemplateProject(assembly))
+          .UseMemoryCachingProvider()
+          .Build();
     });
 
     services.AddScoped<ITransactionalEmailProvider, SmtpTransactionalEmailProvider>();

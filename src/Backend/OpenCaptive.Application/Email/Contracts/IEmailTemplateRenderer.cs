@@ -4,5 +4,5 @@ namespace OpenCaptive.Application.Email.Contracts;
 
 public interface IEmailTemplateRenderer
 {
-  Task<TransactionalEmailBodies> RenderAsync<TModel>(string templateName, TModel model, CancellationToken cancellationToken = default);
+  Task<TransactionalEmailBodies> RenderAsync<TModel>(EmailTemplate template, TModel model) where TModel : class;
 }
