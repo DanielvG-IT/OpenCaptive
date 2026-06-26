@@ -1,6 +1,5 @@
 using System.Reflection;
-using OpenCaptive.Api.Auth;
-using OpenCaptive.Api.Organizations;
+using OpenCaptive.Api.Endpoints;
 
 namespace OpenCaptive.Api.Extensions;
 
@@ -15,6 +14,7 @@ public static class EndpointExtensions
 
     app.MapGroup(prefix)
       .MapOrganizationEndpoints()
+      .MapProfileEndpoints()
       .MapAuthEndpoints();
 
     return app;
