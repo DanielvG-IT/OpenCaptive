@@ -22,7 +22,7 @@ public static class AuthEndpoints
     group.MapPost("/register", Register);
 
     // Email verification
-    // group.MapPost("/verify-email", VerifyEmail);
+    group.MapPost("/verify-email", VerifyEmail);
     // group.MapPost("/verify-email/resend", ResendVerificationEmail).RequireAuthorization();
 
     // Password reset
@@ -90,6 +90,27 @@ public static class AuthEndpoints
     }
 
     var result = await service.RefreshAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<VerifyEmailReponse>, ValidationProblem, ProblemHttpResult>> VerifyEmail(
+    [FromBody] VerifyEmailInput input,
+    [FromServices] IValidator<VerifyEmailInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.VerifyEmailAsync(input, cancellationToken);
     if (result.IsFailure)
     {
       return result.Error.ToProblem();

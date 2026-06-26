@@ -24,4 +24,7 @@ public static class AuthErrors
 
     public static readonly Error UserCreationFailed =
         Error.Failure("auth.user_creation_failed", "Account could not be created. Please try again.");
+
+    public static readonly Error InvalidEmailVerificationToken =
+        Error.Unauthorized("auth.invalid_email_verification_token", "The email verification link is invalid or has expired.");
 }

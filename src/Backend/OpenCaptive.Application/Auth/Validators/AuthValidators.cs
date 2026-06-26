@@ -49,6 +49,18 @@ public sealed class RefreshInputValidator : AbstractValidator<RefreshInput>
   }
 }
 
+public sealed class VerifyEmailInputValidator : AbstractValidator<VerifyEmailInput>
+{
+  public VerifyEmailInputValidator()
+  {
+    RuleFor(x => x.UserId)
+        .NotEmpty();
+
+    RuleFor(x => x.Token)
+        .NotEmpty();
+  }
+}
+
 public sealed class VerifyMfaInputValidator : AbstractValidator<VerifyMfaInput>
 {
   public VerifyMfaInputValidator()

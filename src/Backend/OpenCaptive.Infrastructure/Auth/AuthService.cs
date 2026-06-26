@@ -200,6 +200,23 @@ public sealed class AuthService(
     return Result.Success(new MeResponse(user.Id, user.Email, user.FirstName, user.LastName, user.EmailConfirmed, user.TwoFactorEnabled));
   }
 
+  public async Task<Result<VerifyEmailReponse>> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default)
+  {
+    var user = await _userManager.FindByIdAsync(input.UserId.ToString());
+    if (user is null)
+    {
+      return Result.Failure<VerifyEmailReponse>(AuthErrors.UserNotFound);
+    }
+
+    var confirmResult = await _userManager.ConfirmEmailAsync(user, input.Token);
+    if (confirmResult is null || !confirmResult.Succeeded)
+    {
+      return Result.Failure<VerifyEmailReponse>(AuthErrors.InvalidEmailVerificationToken);
+    }
+
+    return Result.Success(new VerifyEmailReponse(Succeeded: true));
+  }
+
   public Task<Result<TokenResponse>> VerifyMfaAsync(VerifyMfaInput input, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
