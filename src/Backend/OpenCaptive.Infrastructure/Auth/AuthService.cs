@@ -29,6 +29,7 @@ public sealed class AuthService(
     ITransactionalEmailProvider emailProvider,
     IAccessTokenGenerator accessTokenGenerator,
     IEmailTemplateRenderer emailTemplateRenderer,
+    ITwoFactorTokenGenerator twoFactorTokenGenerator,
     IOptions<RefreshTokenOptions> refreshTokenOptions,
     IOptions<EmailVerificationOptions> emailVerificationOptions
     ) : IAuthService
@@ -40,6 +41,7 @@ public sealed class AuthService(
   private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
   private readonly ITransactionalEmailProvider _emailProvider = emailProvider;
   private readonly IAccessTokenGenerator _accessTokenGenerator = accessTokenGenerator;
+  private readonly ITwoFactorTokenGenerator _twoFactorTokenGenerator = twoFactorTokenGenerator;
   private readonly IEmailTemplateRenderer _emailTemplateRenderer = emailTemplateRenderer;
   private readonly IFrontendLinkFactory _frontendLinkFactory = frontendLinkFactory;
 
@@ -78,10 +80,11 @@ public sealed class AuthService(
 
     if (await _userManager.GetTwoFactorEnabledAsync(user))
     {
-      return Result.Success(new LoginResponse(LoginStatus.MfaRequired, null, "challengeCode"));
+      var challengeToken = _twoFactorTokenGenerator.Generate(user.Id);
+      return Result.Success(new LoginResponse(LoginStatus.MfaRequired, null, challengeToken));
     }
 
-    var tokens = await GenerateTokensAsync(user, Guid.CreateVersion7(), cancellationToken);
+    var tokens = await GenerateTokensAsync(user, familyId: Guid.CreateVersion7(), cancellationToken);
     await MarkUserAuthenticatedAsync(user);
 
     return Result.Success(
@@ -217,9 +220,29 @@ public sealed class AuthService(
     return Result.Success(new VerifyEmailReponse(Succeeded: true));
   }
 
-  public Task<Result<TokenResponse>> VerifyMfaAsync(VerifyMfaInput input, CancellationToken cancellationToken = default)
+  public async Task<Result<TokenResponse>> VerifyTwoFactorAsync(VerifyMfaInput input, CancellationToken cancellationToken = default)
   {
-    throw new NotImplementedException();
+    var userId = await _twoFactorTokenGenerator.TryGetUserId(input.ChallengeToken);
+    if (userId is null || userId == Guid.Empty)
+    {
+      return Result.Failure<TokenResponse>(AuthErrors.UserNotFound);
+    }
+
+    var user = await _userManager.FindByIdAsync(userId.Value.ToString());
+    if (user is null)
+    {
+      return Result.Failure<TokenResponse>(AuthErrors.UserNotFound);
+    }
+
+    if (!await _userManager.VerifyTwoFactorTokenAsync(user, TokenOptions.DefaultAuthenticatorProvider, input.Code))
+    {
+      return Result.Failure<TokenResponse>(AuthErrors.InvalidTwoFactorCode);
+    }
+
+    var tokens = await GenerateTokensAsync(user, familyId: Guid.CreateVersion7(), cancellationToken);
+    await MarkUserAuthenticatedAsync(user);
+
+    return Result.Success(new TokenResponse(tokens.AccessToken, tokens.AccessTokenExpiresAt, tokens.RefreshToken, tokens.RefreshTokenExpiresAt));
   }
 
 

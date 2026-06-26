@@ -27,4 +27,7 @@ public static class AuthErrors
 
     public static readonly Error InvalidEmailVerificationToken =
         Error.Unauthorized("auth.invalid_email_verification_token", "The email verification link is invalid or has expired.");
+
+    public static readonly Error InvalidTwoFactorCode =
+        Error.Unauthorized("auth.invalid_two_factor_code", "The two-factor authentication code is invalid or has expired.");
 }

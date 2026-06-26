@@ -42,4 +42,5 @@ public sealed class TwoFactorAuthenticationOptions : IOptionsSection
   public static string SectionName { get; } = "Authentication:TwoFactorAuthentication";
 
   public string AuthenticatorIssuer { get; init; } = "OpenCaptive";
+  public TimeSpan ChallengeTokenLifetime { get; init; }
 }

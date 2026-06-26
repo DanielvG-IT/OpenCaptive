@@ -33,6 +33,7 @@ public static class AuthenticationServiceCollectionExtensions
     services.AddScoped<IAuthService, AuthService>();
 
     services.AddSingleton<IAccessTokenGenerator, JwtAccessTokenGenerator>();
+    services.AddSingleton<ITwoFactorTokenGenerator, JwtTwoFactorTokenGenerator>();
     services.AddSingleton<ITokenHasher, Sha256TokenHasher>();
 
     return services;

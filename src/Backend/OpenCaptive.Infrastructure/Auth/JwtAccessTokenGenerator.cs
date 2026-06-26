@@ -1,17 +1,17 @@
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
 using OpenCaptive.Application.Auth.Contracts;
 using OpenCaptive.Application.Auth.Models;
 using OpenCaptive.Domain.Auth;
-using Microsoft.IdentityModel.JsonWebTokens;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
-using System.Text;
 
 namespace OpenCaptive.Infrastructure.Auth;
 
 public sealed class JwtAccessTokenGenerator(IOptions<JwtOptions> jwtOptions) : IAccessTokenGenerator
 {
+  private readonly SigningCredentials _credentials = new(CreateSecurityKey(jwtOptions.Value.SigningKey), SecurityAlgorithms.HmacSha256);
   private readonly JwtOptions _jwtOptions = jwtOptions.Value;
+  private readonly JsonWebTokenHandler _tokenHandler = new();
 
   // TODO(security, deferred): Persist JTI when access-token revocation,
   // forced logout, or token blacklisting becomes a requirement. Current
@@ -21,40 +21,42 @@ public sealed class JwtAccessTokenGenerator(IOptions<JwtOptions> jwtOptions) : I
 
   public AccessTokenResponse Generate(AccessTokenRequest request)
   {
-    var signingKey = Convert.FromBase64String(_jwtOptions.SigningKey);
-    if (signingKey.Length < 32)
-    {
-      throw new InvalidOperationException("JWT signing key must be at least 256 bits.");
-    }
-
-    var credentials = new SigningCredentials(new SymmetricSecurityKey(signingKey), SecurityAlgorithms.HmacSha256);
     var expiresAt = DateTimeOffset.UtcNow.Add(_jwtOptions.Lifetime);
+    var claims = new Dictionary<string, object>
+        {
+            { JwtRegisteredClaimNames.Sub, request.UserId.ToString() },
+            { JwtRegisteredClaimNames.Email, request.Email },
+            { JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString() }
+        };
 
-    var claims = new List<Claim>
+    if (request.OrganizationId.HasValue && request.OrganizationRole.HasValue)
     {
-      new(JwtRegisteredClaimNames.Sub, request.UserId.ToString()),
-      new(JwtRegisteredClaimNames.Email, request.Email),
-      new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString())
-    };
-
-    if (request.OrganizationId is not null && request.OrganizationRole is not null)
-    {
-      claims.Add(new Claim(OrganizationClaimTypes.OrganizationId, request.OrganizationId.Value.ToString()));
-      claims.Add(new Claim(OrganizationClaimTypes.OrganizationRole, request.OrganizationRole.Value.ToString()));
+      claims.Add(OrganizationClaimTypes.OrganizationId, request.OrganizationId.Value.ToString());
+      claims.Add(OrganizationClaimTypes.OrganizationRole, request.OrganizationRole.Value.ToString());
     }
 
     var tokenDescriptor = new SecurityTokenDescriptor
     {
-      Subject = new ClaimsIdentity(claims),
+      Claims = claims,
       Audience = _jwtOptions.Audience,
       Issuer = _jwtOptions.Issuer,
-      SigningCredentials = credentials,
       Expires = expiresAt.UtcDateTime,
+      SigningCredentials = _credentials
     };
 
-    var tokenHandler = new JsonWebTokenHandler();
-    var tokenString = tokenHandler.CreateToken(tokenDescriptor);
+    var token = _tokenHandler.CreateToken(tokenDescriptor);
 
-    return new AccessTokenResponse(tokenString, expiresAt);
+    return new AccessTokenResponse(token, expiresAt);
+  }
+
+  private static SymmetricSecurityKey CreateSecurityKey(string base64Key)
+  {
+    var keyBytes = Convert.FromBase64String(base64Key);
+    if (keyBytes.Length < 32)
+    {
+      throw new InvalidOperationException("JWT signing key must be at least 256 bits.");
+    }
+
+    return new SymmetricSecurityKey(keyBytes);
   }
 }
