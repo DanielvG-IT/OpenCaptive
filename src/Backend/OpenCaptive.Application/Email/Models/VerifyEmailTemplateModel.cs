@@ -1,7 +1,7 @@
 namespace OpenCaptive.Application.Email.Models;
 
 public sealed record VerifyEmailTemplateModel(
-    string RecipientEmail,
+    string RecipientFirstName,
     string VerificationUrl,
     TimeSpan TokenLifetime
 );

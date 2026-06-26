@@ -19,16 +19,18 @@ public sealed class SmtpTransactionalEmailProvider(IOptions<EmailOptions> emailO
   public async Task SendAsync(TransactionalEmail email, CancellationToken cancellationToken = default)
   {
     ArgumentNullException.ThrowIfNull(email);
+    ArgumentNullException.ThrowIfNull(email.Bodies);
+    ArgumentException.ThrowIfNullOrWhiteSpace(email.ToAddress);
 
     var message = new MimeMessage();
 
     message.From.Add(new MailboxAddress(_emailOptions.From.Name, _emailOptions.From.Address));
     message.To.Add(new MailboxAddress(email.ToName, email.ToAddress));
-    message.Subject = email.Subject ?? throw new ArgumentException("Email subject cannot be null.", nameof(email));
+    message.Subject = email.Subject;
     message.Body = new BodyBuilder
     {
-      TextBody = email.TextBody,
-      HtmlBody = email.HtmlBody
+      HtmlBody = email.Bodies.HtmlBody,
+      TextBody = email.Bodies.TextBody
     }.ToMessageBody();
 
     // Use StartTls to prevent downgrade attacks

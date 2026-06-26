@@ -8,29 +8,34 @@ public sealed class FrontendLinkFactory(IOptions<FrontendOptions> options) : IFr
 {
   private readonly FrontendOptions _options = options.Value;
 
-  public string CreateInvitationLink(Guid invitationId, string token)
-  {
-    throw new NotImplementedException();
-  }
+  public string CreateInvitationLink(Guid invitationId, string token) =>
+      CreateLink(FrontendRoutes.Invitation, new Dictionary<string, string?>
+      {
+        ["invitationId"] = invitationId.ToString(),
+        ["token"] = token
+      });
 
-  public string CreateResetPasswordLink(Guid userId, string token)
-  {
-    throw new NotImplementedException();
-  }
+  public string CreateResetPasswordLink(Guid userId, string token) =>
+      CreateLink(FrontendRoutes.ResetPassword, new Dictionary<string, string?>
+      {
+        ["userId"] = userId.ToString(),
+        ["token"] = token
+      });
 
-  public string CreateVerifyEmailLink(Guid userId, string token)
+  public string CreateVerifyEmailLink(Guid userId, string token) =>
+      CreateLink(FrontendRoutes.VerifyEmail, new Dictionary<string, string?>
+      {
+        ["userId"] = userId.ToString(),
+        ["token"] = token
+      });
+
+  private string CreateLink(string path, IReadOnlyDictionary<string, string?> queryParameters)
   {
     var builder = new UriBuilder(_options.ApplicationUrl)
     {
-      Path = FrontendRoutes.VerifyEmail
+      Path = path
     };
 
-    return QueryHelpers.AddQueryString(
-        builder.Uri.ToString(),
-        new Dictionary<string, string?>
-        {
-          ["userId"] = userId.ToString(),
-          ["token"] = token
-        });
+    return QueryHelpers.AddQueryString(builder.Uri.ToString(), queryParameters);
   }
 }

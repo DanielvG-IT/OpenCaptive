@@ -15,7 +15,6 @@ using OpenCaptive.Application.Email.Models;
 using OpenCaptive.Application.Organizations.Errors;
 using OpenCaptive.Domain.Auth;
 using OpenCaptive.Domain.Organizations;
-using OpenCaptive.Infrastructure.Auth;
 using OpenCaptive.Infrastructure.Persistence;
 
 namespace OpenCaptive.Infrastructure.Auth;
@@ -216,17 +215,20 @@ public sealed class AuthService(
 
     try
     {
-      var emailBodies = await _emailTemplateRenderer.RenderAsync(
-          "VerifyEmail",
-          new VerifyEmailTemplateModel(user.Email!, verificationUrl, _emailVerificationOptions.TokenLifetime),
-          cancellationToken);
+      var bodies = await _emailTemplateRenderer.RenderAsync(
+          EmailTemplate.VerifyEmail,
+          new VerifyEmailTemplateModel(
+            user.FirstName,
+            verificationUrl,
+            _emailVerificationOptions.TokenLifetime
+          )
+      );
 
       var email = new TransactionalEmail(
           ToAddress: user.Email!,
           ToName: user.FirstName,
           Subject: "OpenCaptive email verification",
-          HtmlBody: emailBodies.HtmlBody,
-          TextBody: emailBodies.TextBody
+          Bodies: bodies
       );
 
       await _emailProvider.SendAsync(email, cancellationToken);
