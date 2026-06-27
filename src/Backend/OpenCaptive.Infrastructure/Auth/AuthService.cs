@@ -78,7 +78,7 @@ public sealed class AuthService(
       return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
     }
 
-    if (await _userManager.GetTwoFactorEnabledAsync(user))
+    if (user.TwoFactorEnabled)
     {
       var challengeToken = _twoFactorTokenGenerator.Generate(user.Id);
       return Result.Success(new LoginResponse(LoginStatus.MfaRequired, null, challengeToken));
@@ -190,17 +190,6 @@ public sealed class AuthService(
     var tokens = await GenerateTokensAsync(user, refreshToken.FamilyId, cancellationToken);
 
     return Result.Success(new TokenResponse(tokens.AccessToken, tokens.AccessTokenExpiresAt, tokens.RefreshToken, tokens.RefreshTokenExpiresAt));
-  }
-
-  public async Task<Result<MeResponse>> MeAsync(Guid userId, CancellationToken cancellationToken = default)
-  {
-    var user = await _userManager.FindByIdAsync(userId.ToString());
-    if (user is null || string.IsNullOrWhiteSpace(user.Email) || !user.IsActive)
-    {
-      return Result.Failure<MeResponse>(AuthErrors.UserNotFound);
-    }
-
-    return Result.Success(new MeResponse(user.Id, user.Email, user.FirstName, user.LastName, user.EmailConfirmed, user.TwoFactorEnabled));
   }
 
   public async Task<Result<VerifyEmailReponse>> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default)
