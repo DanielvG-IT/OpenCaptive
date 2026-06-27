@@ -12,7 +12,6 @@ public sealed record LoginResponse(LoginStatus Status, TokenResponse? Tokens, st
 public sealed record TokenResponse(string AccessToken, DateTimeOffset AccessTokenExpiresAt, string RefreshToken, DateTimeOffset RefreshTokenExpiresAt);
 public sealed record RegisterResponse(bool VerificationEmailSent);
 public sealed record VerifyEmailReponse(bool Succeeded);
-public sealed record MeResponse(Guid Id, string Email, string FirstName, string LastName, bool EmailConfirmed, bool TwoFactorEnabled);
 
 public enum LoginStatus
 {
