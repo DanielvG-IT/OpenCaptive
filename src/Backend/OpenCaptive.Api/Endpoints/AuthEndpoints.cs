@@ -31,7 +31,7 @@ public static class AuthEndpoints
 
     // MFA
     group.MapPost("/verify-mfa", VerifyTwoFactor).WithName("AuthVerifyMfa");
-    // group.MapPost("/verify-mfa/recovery-code", VerifyTwoFactorRecovery).WithName("AuthRecoverVerifyMfa");
+    group.MapPost("/verify-mfa/recovery-code", RedeemRecoveryCode).WithName("AuthRecoverVerifyMfa");
 
     return app;
   }
@@ -133,6 +133,27 @@ public static class AuthEndpoints
     }
 
     var result = await service.VerifyTwoFactorAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<RedeemRecoveryCodeResponse>, ValidationProblem, ProblemHttpResult>> RedeemRecoveryCode(
+    [FromBody] RedeemRecoveryCodeInput input,
+    [FromServices] IValidator<RedeemRecoveryCodeInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.RedeemRecoveryCodeAsync(input, cancellationToken);
     if (result.IsFailure)
     {
       return result.Error.ToProblem();

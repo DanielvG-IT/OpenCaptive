@@ -11,4 +11,5 @@ public interface IAuthService
 
   Task<Result<VerifyEmailReponse>> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default);
   Task<Result<TokenResponse>> VerifyTwoFactorAsync(VerifyMfaInput input, CancellationToken cancellationToken = default);
+  Task<Result<RedeemRecoveryCodeResponse>> RedeemRecoveryCodeAsync(RedeemRecoveryCodeInput input, CancellationToken cancellationToken = default);
 }

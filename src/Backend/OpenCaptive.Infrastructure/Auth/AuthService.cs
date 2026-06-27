@@ -234,6 +234,43 @@ public sealed class AuthService(
     return Result.Success(new TokenResponse(tokens.AccessToken, tokens.AccessTokenExpiresAt, tokens.RefreshToken, tokens.RefreshTokenExpiresAt));
   }
 
+  public async Task<Result<RedeemRecoveryCodeResponse>> RedeemRecoveryCodeAsync(RedeemRecoveryCodeInput input, CancellationToken cancellationToken = default)
+  {
+    var userId = await _twoFactorTokenGenerator.TryGetUserId(input.ChallengeToken);
+    if (userId is null || userId == Guid.Empty)
+    {
+      return Result.Failure<RedeemRecoveryCodeResponse>(AuthErrors.UserNotFound);
+    }
+
+    var user = await _userManager.FindByIdAsync(userId.Value.ToString());
+    if (user is null)
+    {
+      return Result.Failure<RedeemRecoveryCodeResponse>(AuthErrors.UserNotFound);
+    }
+
+    var redeemResult = await _userManager.RedeemTwoFactorRecoveryCodeAsync(user, input.RecoveryCode);
+    if (redeemResult is null || !redeemResult.Succeeded)
+    {
+      return Result.Failure<RedeemRecoveryCodeResponse>(AuthErrors.InvalidRecoveryCode);
+    }
+
+    var amountCodesLeft = await _userManager.CountRecoveryCodesAsync(user);
+
+    var tokens = await GenerateTokensAsync(user, familyId: Guid.CreateVersion7(), cancellationToken);
+    await MarkUserAuthenticatedAsync(user);
+
+    return Result.Success(
+        new RedeemRecoveryCodeResponse(
+            new TokenResponse(
+              tokens.AccessToken,
+              tokens.AccessTokenExpiresAt,
+              tokens.RefreshToken,
+              tokens.RefreshTokenExpiresAt
+            ),
+            amountCodesLeft
+        ));
+  }
+
 
   // ===== Helpers ======
   private async Task<bool> SendVerificationEmail(ApplicationUser user, CancellationToken cancellationToken)

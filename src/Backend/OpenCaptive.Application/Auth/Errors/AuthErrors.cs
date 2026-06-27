@@ -30,4 +30,7 @@ public static class AuthErrors
 
     public static readonly Error InvalidTwoFactorCode =
         Error.Unauthorized("auth.invalid_two_factor_code", "The two-factor authentication code is invalid or has expired.");
+
+    public static readonly Error InvalidRecoveryCode =
+        Error.Unauthorized("auth.invalid_recovery_code", "The recovery code is invalid or has already been used.");
 }

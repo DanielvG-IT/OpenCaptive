@@ -74,3 +74,15 @@ public sealed class VerifyMfaInputValidator : AbstractValidator<VerifyMfaInput>
         .Matches("^[0-9]{6}$");
   }
 }
+
+public sealed class RedeemRecoveryCodeInputValidator : AbstractValidator<RedeemRecoveryCodeInput>
+{
+  public RedeemRecoveryCodeInputValidator()
+  {
+    RuleFor(x => x.ChallengeToken)
+        .NotEmpty();
+
+    RuleFor(x => x.RecoveryCode)
+        .NotEmpty();
+  }
+}
