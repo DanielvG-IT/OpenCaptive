@@ -43,4 +43,5 @@ public sealed class TwoFactorAuthenticationOptions : IOptionsSection
 
   public string AuthenticatorIssuer { get; init; } = "OpenCaptive";
   public TimeSpan ChallengeTokenLifetime { get; init; }
+  public int RecoveryCodeCount { get; init; } = 10;
 }
