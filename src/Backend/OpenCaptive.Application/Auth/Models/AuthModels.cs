@@ -1,5 +1,3 @@
-using OpenCaptive.Domain.Organizations;
-
 namespace OpenCaptive.Application.Auth.Models;
 
 public sealed record LoginInput(string Email, string Password);

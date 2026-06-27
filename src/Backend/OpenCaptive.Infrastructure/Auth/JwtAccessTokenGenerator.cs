@@ -2,7 +2,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using OpenCaptive.Application.Auth.Contracts;
-using OpenCaptive.Application.Auth.Models;
 using OpenCaptive.Domain.Auth;
 
 namespace OpenCaptive.Infrastructure.Auth;
