@@ -13,19 +13,16 @@ public static class ProfileEndpoints
     // TODO Add Permissions to endpoints
     var group = app.MapGroup("/profile").WithTags("Profile").RequireAuthorization();
 
-    group.MapGet(string.Empty, GetProfile);
-    // group.MapPatch(string.Empty, PatchProfile);
+    group.MapGet(string.Empty, GetProfile).WithName("ProfileGet");
+    // group.MapPatch(string.Empty, PatchProfile).WithName("ProfileUpdate");
 
-    // group.MapPost("/avatar", UploadAvatar);
-    // group.MapDelete("/avatar", DeleteAvatar);
+    // group.MapPost("/avatar", UploadAvatar).WithName("ProfileUploadAvatar");
+    // group.MapDelete("/avatar", DeleteAvatar).WithName("ProfileDeleteAvatar");
 
-    // group.MapPost("/change-password", ChangePassword);
-    // group.MapPost("/change-email", ChangeEmail);
-
-    group.MapPost("/mfa/setup", SetupTwoFactor);
-    group.MapPost("/mfa/enable", EnableTwoFactor);
-    group.MapPost("/mfa/disable", DisableTwoFactor);
-    // group.MapPost("/mfa/regenerate-recovery-codes", RegenerateRecoveryCodes).RequireAuthorization();
+    group.MapPost("/mfa/setup", SetupTwoFactor).WithName("ProfileSetupMfa");
+    group.MapPost("/mfa/enable", EnableTwoFactor).WithName("ProfileEnableMfa");
+    group.MapPost("/mfa/disable", DisableTwoFactor).WithName("ProfileDisableMfa");
+    // group.MapPost("/mfa/regenerate-recovery-codes", RegenerateRecoveryCodes).WithName("ProfileRegenerateRecoveryCodes");
 
     return app;
   }
@@ -46,7 +43,7 @@ public static class ProfileEndpoints
     return TypedResults.Ok(result.Value);
   }
 
-  private static async Task<Results<Created<TwoFactorSetupResponse>, ValidationProblem, ProblemHttpResult>> SetupTwoFactor(
+  private static async Task<Results<Ok<TwoFactorSetupResponse>, ValidationProblem, ProblemHttpResult>> SetupTwoFactor(
     HttpContext context,
     [FromServices] IProfileService service,
     CancellationToken cancellationToken)
@@ -59,13 +56,14 @@ public static class ProfileEndpoints
       return result.Error.ToProblem();
     }
 
-    return TypedResults.Created("", result.Value);
+    return TypedResults.Ok(result.Value);
   }
 
-  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> EnableTwoFactor(
+  private static async Task<Results<Created<TwoFactorEnableResponse>, ValidationProblem, ProblemHttpResult>> EnableTwoFactor(
     HttpContext context,
     [FromBody] ChangeTwoFactorStateInput input,
     [FromServices] IValidator<ChangeTwoFactorStateInput> validator,
+    [FromServices] LinkGenerator linkGenerator,
     [FromServices] IProfileService service,
     CancellationToken cancellationToken)
   {
@@ -82,7 +80,7 @@ public static class ProfileEndpoints
       return result.Error.ToProblem();
     }
 
-    return TypedResults.NoContent();
+    return TypedResults.Created(linkGenerator.GetPathByName("AuthVerifyMfa"), result.Value);
   }
 
   private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> DisableTwoFactor(

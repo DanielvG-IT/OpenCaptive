@@ -14,23 +14,24 @@ public static class AuthEndpoints
     var group = app.MapGroup("/auth").WithTags("Authentication");
 
     // Auth
-    group.MapPost("/login", Login);
-    group.MapPost("/refresh", Refresh);
-    // group.MapPost("/logout", Logout).RequireAuthorization();
+    group.MapPost("/login", Login).WithName("AuthLogin");
+    group.MapPost("/refresh", Refresh).WithName("AuthRefresh");
+    // group.MapPost("/logout", Logout).RequireAuthorization().WithName("AuthLogout");
 
     // Registration
-    group.MapPost("/register", Register);
+    group.MapPost("/register", Register).WithName("AuthRegister");
 
     // Email verification
-    group.MapPost("/verify-email", VerifyEmail);
-    // group.MapPost("/verify-email/resend", ResendVerificationEmail).RequireAuthorization();
+    group.MapPost("/verify-email", VerifyEmail).WithName("AuthVerifyEmail");
+    // group.MapPost("/verify-email/resend", ResendVerificationEmail).RequireAuthorization().WithName("AuthResendVerifyEmail");
 
     // Password reset
-    // group.MapPost("/forgot-password", ForgotPassword);
-    // group.MapPost("/reset-password", ResetPassword);
+    // group.MapPost("/forgot-password", ForgotPassword).WithName("AuthForgotPassword");
+    // group.MapPost("/reset-password", ResetPassword).WithName("AuthResetPassword");
 
     // MFA
-    // group.MapPost("/verify-mfa", VerifyMfa);
+    group.MapPost("/verify-mfa", VerifyTwoFactor).WithName("AuthVerifyMfa");
+    // group.MapPost("/verify-mfa/recovery-code", VerifyTwoFactorRecovery).WithName("AuthRecoverVerifyMfa");
 
     return app;
   }
@@ -111,6 +112,27 @@ public static class AuthEndpoints
     }
 
     var result = await service.VerifyEmailAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> VerifyTwoFactor(
+    [FromBody] VerifyMfaInput input,
+    [FromServices] IValidator<VerifyMfaInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.VerifyTwoFactorAsync(input, cancellationToken);
     if (result.IsFailure)
     {
       return result.Error.ToProblem();
