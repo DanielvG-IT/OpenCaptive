@@ -1,0 +1,22 @@
+@using OpenCaptive.Application.Email.Models
+@using OpenCaptive.Infrastructure.Email.Components
+@model VerifyEmailTemplateModel
+@{
+    Layout = "Shared/_Layout";
+    ViewBag.Title = "Verify your email";
+    ViewBag.Preheader = "Verify your email address to activate your OpenCaptive account.";
+    ViewBag.FooterReason = "You received this email because an OpenCaptive account was created with this email address.";
+
+    var hours = (int)Math.Round(Model.TokenLifetime.TotalHours);
+}
+<h1 style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 28px; line-height: 36px; font-weight: 700; color: #0F172A;">Verify your email</h1>
+
+<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 26px; color: #475569;">Hi @Model.RecipientFirstName,</p>
+
+<p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 26px; color: #475569;">Thanks for creating an OpenCaptive account. Confirm this is your email address to activate your account and get started.</p>
+
+@{ await IncludeAsync("Shared/_Button", new ButtonModel("Verify email", Model.VerificationUrl)); }
+
+@{ await IncludeAsync("Shared/_Alert", new AlertModel(AlertVariant.Information, $"This link expires in {hours} hours.", "For your security it can only be used once. If it expires, you can request a new verification email from the sign-in page.")); }
+
+<p style="margin: 24px 0 0 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 22px; color: #64748B;">If you didn't create an OpenCaptive account, you can safely ignore this email — no account will be activated.</p>

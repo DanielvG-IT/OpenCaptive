@@ -1,0 +1,31 @@
+@using OpenCaptive.Infrastructure.Email.Components
+@model ButtonModel
+@{
+    bool isPrimary = Model.Variant == ButtonVariant.Primary;
+    string background = isPrimary ? "#4F46E5" : "#FFFFFF";
+    string foreground = isPrimary ? "#FFFFFF" : "#4F46E5";
+    string border = isPrimary ? "#4F46E5" : "#C7D2FE";
+}
+<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+  <tr>
+    <td align="center" style="padding: 8px 0 24px 0;">
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="center" style="border-radius: 8px; background-color: @background; border: 1px solid @border;">
+            <a href="@Model.Url" target="_blank" rel="noopener" style="display: inline-block; padding: 14px 28px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 20px; font-weight: 600; color: @foreground; text-decoration: none; border-radius: 8px;">@Model.Label</a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding: 0 0 6px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 22px; color: #64748B;">
+      Or copy and paste this link into your browser:
+    </td>
+  </tr>
+  <tr>
+    <td style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 22px; word-break: break-all;">
+      <a href="@Model.Url" style="color: #4F46E5; text-decoration: underline; word-break: break-all;">@Model.Url</a>
+    </td>
+  </tr>
+</table>

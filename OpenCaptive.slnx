@@ -5,7 +5,6 @@
   <Folder Name="/src/Backend/">
     <Project Path="src/Backend/OpenCaptive.Api/OpenCaptive.Api.csproj" />
     <Project Path="src/Backend/OpenCaptive.Application/OpenCaptive.Application.csproj" />
-    <Project Path="src/Backend/OpenCaptive.Contracts/OpenCaptive.Contracts.csproj" />
     <Project Path="src/Backend/OpenCaptive.Domain/OpenCaptive.Domain.csproj" />
     <Project Path="src/Backend/OpenCaptive.Infrastructure/OpenCaptive.Infrastructure.csproj" />
   </Folder>

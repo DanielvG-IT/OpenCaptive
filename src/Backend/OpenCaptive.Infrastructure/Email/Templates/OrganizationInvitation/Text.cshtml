@@ -1,0 +1,30 @@
+@using OpenCaptive.Application.Email.Models
+@model OrganizationInvitationTemplateModel
+@{
+    var days = (int)Math.Round(Model.TokenLifetime.TotalDays);
+    var greeting = string.IsNullOrWhiteSpace(Model.RecipientFirstName) ? "Hello," : $"Hi {Model.RecipientFirstName},";
+}
+You've been invited
+
+@greeting
+
+@Model.InviterName invited you to join @Model.OrganizationName on OpenCaptive. Accept the invitation to set up your access.
+
+Organization: @Model.OrganizationName
+Role: @Model.RoleName
+Invited by: @Model.InviterName
+
+Accept the invitation by opening the link below:
+
+@Raw(Model.InvitationUrl)
+
+This invitation expires in @days days.
+
+If you don't recognize this organization, you can safely ignore this email and no access will be granted.
+
+--
+You received this email because you were invited to join an organization on OpenCaptive.
+Need help? @Raw(ViewBag.SupportUrl)
+@Raw(ViewBag.WebsiteUrl)
+
+(c) @DateTime.UtcNow.Year @ViewBag.BrandName. All rights reserved.

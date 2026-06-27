@@ -1,9 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using OpenCaptive.Application.Organizations;
+using OpenCaptive.Application.Email.Contracts;
+using OpenCaptive.Application.Organizations.Contracts;
+using OpenCaptive.Application.Profile;
+using OpenCaptive.Infrastructure.Auth;
+using OpenCaptive.Infrastructure.Email;
+using OpenCaptive.Infrastructure.Frontend;
+using OpenCaptive.Infrastructure.Organizations;
 using OpenCaptive.Infrastructure.Persistence;
-using OpenCaptive.Infrastructure.Repositories;
+using OpenCaptive.Infrastructure.Profile;
 
 namespace OpenCaptive.Infrastructure;
 
@@ -11,8 +17,18 @@ public static class DependencyInjection
 {
   public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
   {
+    services.AddOpenCaptiveAuthentication(configuration);
+
+    services.AddOpenCaptiveEmail(configuration);
+
+    services.Configure<FrontendOptions>(configuration.GetSection(FrontendOptions.SectionName));
+
     services.AddDbContext<OpenCaptiveDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("Postgres")));
-    services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+
+    services.AddScoped<IOrganizationService, OrganizationService>();
+    services.AddScoped<IProfileService, ProfileService>();
+
+    services.AddScoped<IFrontendLinkFactory, FrontendLinkFactory>();
 
     return services;
   }

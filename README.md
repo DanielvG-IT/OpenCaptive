@@ -61,7 +61,7 @@ OpenCaptive/
 
 ```bash
 # Start Postgres (required before running the API)
-docker compose up -d
+docker compose -f docker/compose.yml up -d
 ```
 
 ### Backend

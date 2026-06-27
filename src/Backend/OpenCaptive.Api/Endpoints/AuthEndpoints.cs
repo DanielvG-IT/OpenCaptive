@@ -1,0 +1,143 @@
+using FluentValidation;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
+using OpenCaptive.Api.Extensions;
+using OpenCaptive.Application.Auth.Contracts;
+using OpenCaptive.Application.Auth.Models;
+
+namespace OpenCaptive.Api.Endpoints;
+
+public static class AuthEndpoints
+{
+  public static IEndpointRouteBuilder MapAuthEndpoints(this IEndpointRouteBuilder app)
+  {
+    var group = app.MapGroup("/auth").WithTags("Authentication");
+
+    // Auth
+    group.MapPost("/login", Login).WithName("AuthLogin");
+    group.MapPost("/refresh", Refresh).WithName("AuthRefresh");
+    // group.MapPost("/logout", Logout).RequireAuthorization().WithName("AuthLogout");
+
+    // Registration
+    group.MapPost("/register", Register).WithName("AuthRegister");
+
+    // Email verification
+    group.MapPost("/verify-email", VerifyEmail).WithName("AuthVerifyEmail");
+    // group.MapPost("/verify-email/resend", ResendVerificationEmail).RequireAuthorization().WithName("AuthResendVerifyEmail");
+
+    // Password reset
+    // group.MapPost("/forgot-password", ForgotPassword).WithName("AuthForgotPassword");
+    // group.MapPost("/reset-password", ResetPassword).WithName("AuthResetPassword");
+
+    // MFA
+    group.MapPost("/verify-mfa", VerifyTwoFactor).WithName("AuthVerifyMfa");
+    // group.MapPost("/verify-mfa/recovery-code", VerifyTwoFactorRecovery).WithName("AuthRecoverVerifyMfa");
+
+    return app;
+  }
+
+  private static async Task<Results<Ok<LoginResponse>, ValidationProblem, ProblemHttpResult>> Login(
+    [FromBody] LoginInput input,
+    [FromServices] IValidator<LoginInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.LoginAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<RegisterResponse>, ValidationProblem, ProblemHttpResult>> Register(
+    [FromBody] RegisterInput input,
+    [FromServices] IValidator<RegisterInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.RegisterAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> Refresh(
+    [FromBody] RefreshInput input,
+    [FromServices] IValidator<RefreshInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.RefreshAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<VerifyEmailReponse>, ValidationProblem, ProblemHttpResult>> VerifyEmail(
+    [FromBody] VerifyEmailInput input,
+    [FromServices] IValidator<VerifyEmailInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.VerifyEmailAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> VerifyTwoFactor(
+    [FromBody] VerifyMfaInput input,
+    [FromServices] IValidator<VerifyMfaInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.VerifyTwoFactorAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+}

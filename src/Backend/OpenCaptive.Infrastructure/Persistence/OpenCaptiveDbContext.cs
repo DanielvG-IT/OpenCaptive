@@ -1,20 +1,31 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using OpenCaptive.Domain.Auth;
 using OpenCaptive.Domain.Common;
 using OpenCaptive.Domain.Organizations;
+using OpenCaptive.Infrastructure.Auth;
 
 namespace OpenCaptive.Infrastructure.Persistence;
 
-public sealed class OpenCaptiveDbContext : DbContext
+public sealed class OpenCaptiveDbContext(DbContextOptions<OpenCaptiveDbContext> options) : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
-  public OpenCaptiveDbContext(DbContextOptions<OpenCaptiveDbContext> options)
-    : base(options)
-  {
-  }
-
   public DbSet<Organization> Organizations => Set<Organization>();
+  public DbSet<OrganizationMembership> OrganizationMemberships => Set<OrganizationMembership>();
+  public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
+    base.OnModelCreating(modelBuilder);
+
+    modelBuilder.Entity<ApplicationUser>().Property(x => x.FirstName)
+        .HasMaxLength(100)
+        .IsRequired();
+
+    modelBuilder.Entity<ApplicationUser>().Property(x => x.LastName)
+        .HasMaxLength(100)
+        .IsRequired();
+
     modelBuilder.ApplyConfigurationsFromAssembly(typeof(OpenCaptiveDbContext).Assembly);
   }
 

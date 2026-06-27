@@ -1,0 +1,32 @@
+@using OpenCaptive.Application.Email.Models
+@using OpenCaptive.Infrastructure.Email.Components
+@model OrganizationInvitationTemplateModel
+@{
+    Layout = "Shared/_Layout";
+    ViewBag.Title = "You've been invited to join an organization";
+    ViewBag.Preheader = "You've been invited to join an organization on OpenCaptive.";
+    ViewBag.FooterReason = "You received this email because you were invited to join an organization on OpenCaptive.";
+
+    var days = (int)Math.Round(Model.TokenLifetime.TotalDays);
+    var greeting = string.IsNullOrWhiteSpace(Model.RecipientFirstName) ? "Hello," : $"Hi {Model.RecipientFirstName},";
+
+    var details = new PanelModel(new[]
+    {
+        new PanelRow("Organization", Model.OrganizationName),
+        new PanelRow("Role", Model.RoleName),
+        new PanelRow("Invited by", Model.InviterName)
+    });
+}
+<h1 style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 28px; line-height: 36px; font-weight: 700; color: #0F172A;">You've been invited</h1>
+
+<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 26px; color: #475569;">@greeting</p>
+
+<p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 26px; color: #475569;"><strong style="color: #0F172A;">@Model.InviterName</strong> invited you to join <strong style="color: #0F172A;">@Model.OrganizationName</strong> on OpenCaptive. Accept the invitation to set up your access.</p>
+
+@{ await IncludeAsync("Shared/_Panel", details); }
+
+@{ await IncludeAsync("Shared/_Button", new ButtonModel("Accept invitation", Model.InvitationUrl)); }
+
+<p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 22px; color: #64748B;">This invitation expires in @days days.</p>
+
+@{ await IncludeAsync("Shared/_Alert", new AlertModel(AlertVariant.Information, "Weren't expecting this?", "If you don't recognize this organization, you can safely ignore this email and no access will be granted.")); }

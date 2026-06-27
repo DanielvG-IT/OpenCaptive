@@ -1,0 +1,22 @@
+@using OpenCaptive.Application.Email.Models
+@using OpenCaptive.Infrastructure.Email.Components
+@model PasswordResetTemplateModel
+@{
+    Layout = "Shared/_Layout";
+    ViewBag.Title = "Reset your password";
+    ViewBag.Preheader = "Reset your password using the secure link below.";
+    ViewBag.FooterReason = "You received this email because a password reset was requested for your OpenCaptive account.";
+
+    var hours = (int)Math.Round(Model.TokenLifetime.TotalHours);
+}
+<h1 style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 28px; line-height: 36px; font-weight: 700; color: #0F172A;">Reset your password</h1>
+
+<p style="margin: 0 0 16px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 26px; color: #475569;">Hi @Model.RecipientFirstName,</p>
+
+<p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px; line-height: 26px; color: #475569;">We received a request to reset the password for your OpenCaptive account. Choose a new password using the button below.</p>
+
+@{ await IncludeAsync("Shared/_Button", new ButtonModel("Reset password", Model.ResetUrl)); }
+
+<p style="margin: 0 0 24px 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 22px; color: #64748B;">This link expires in @hours hours and can only be used once.</p>
+
+@{ await IncludeAsync("Shared/_Alert", new AlertModel(AlertVariant.Warning, "Didn't request this?", "If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged until you create a new one.")); }

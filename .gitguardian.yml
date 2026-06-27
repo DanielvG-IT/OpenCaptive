@@ -1,4 +1,6 @@
 version: 2
-ignore-paths:
-  - src/Backend/OpenCaptive.Api/appsettings.Development.json
-  - src/Backend/OpenCaptive.Api/appsettings.*.Local.json
+
+secret:
+  ignored_paths:
+    - docker/compose.yml
+    - src/Backend/OpenCaptive.Api/appsettings.json

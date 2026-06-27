@@ -1,0 +1,23 @@
+@using OpenCaptive.Application.Email.Models
+@model VerifyEmailTemplateModel
+@{
+    var hours = (int)Math.Round(Model.TokenLifetime.TotalHours);
+}
+Verify your email
+
+Hi @Model.RecipientFirstName,
+
+Thanks for creating an OpenCaptive account. Confirm this is your email address to activate your account by opening the link below:
+
+@Raw(Model.VerificationUrl)
+
+This link expires in @hours hours and can only be used once. If it expires, you can request a new verification email from the sign-in page.
+
+If you didn't create an OpenCaptive account, you can safely ignore this email — no account will be activated.
+
+--
+You received this email because an OpenCaptive account was created with this email address.
+Need help? @Raw(ViewBag.SupportUrl)
+@Raw(ViewBag.WebsiteUrl)
+
+(c) @DateTime.UtcNow.Year @ViewBag.BrandName. All rights reserved.
