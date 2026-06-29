@@ -150,6 +150,28 @@ public sealed class AuthService(
     }
   }
 
+  public async Task<Result> LogoutAsync(LogoutInput input, Guid userId, CancellationToken cancellationToken = default)
+  {
+    var refreshTokenHash = _tokenHasher.Hash(input.RefreshToken);
+    var now = DateTimeOffset.UtcNow;
+
+    var refreshToken = await _dbContext.RefreshTokens.SingleOrDefaultAsync(x => x.TokenHash == refreshTokenHash, cancellationToken);
+    if (refreshToken is null || refreshToken.IsExpired)
+    {
+      return Result.Failure(AuthErrors.InvalidRefreshToken);
+    }
+    if (refreshToken.UserId != userId)
+    {
+      return Result.Failure(AuthErrors.InvalidRefreshToken);
+    }
+
+    await _dbContext.RefreshTokens
+        .Where(x => x.UserId == refreshToken.UserId && x.FamilyId == refreshToken.FamilyId && x.RevokedAt == null)
+        .ExecuteUpdateAsync(s => s.SetProperty(x => x.RevokedAt, now), cancellationToken);
+
+    return Result.Success();
+  }
+
   public async Task<Result<TokenResponse>> RefreshAsync(RefreshInput input, CancellationToken cancellationToken = default)
   {
     var refreshTokenHash = _tokenHasher.Hash(input.RefreshToken);

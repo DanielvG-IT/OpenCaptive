@@ -16,7 +16,7 @@ public static class AuthEndpoints
     // Auth
     group.MapPost("/login", Login).WithName("AuthLogin");
     group.MapPost("/refresh", Refresh).WithName("AuthRefresh");
-    // group.MapPost("/logout", Logout).RequireAuthorization().WithName("AuthLogout");
+    group.MapPost("/logout", Logout).RequireAuthorization().WithName("AuthLogout");
 
     // Registration
     group.MapPost("/register", Register).WithName("AuthRegister");
@@ -76,6 +76,30 @@ public static class AuthEndpoints
     }
 
     return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> Logout(
+    HttpContext context,
+    [FromBody] LogoutInput input,
+    [FromServices] IValidator<LogoutInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var userId = context.User.GetUserId();
+
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.LogoutAsync(input, userId, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
   }
 
   private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> Refresh(

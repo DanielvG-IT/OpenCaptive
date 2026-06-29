@@ -3,6 +3,7 @@ namespace OpenCaptive.Application.Auth.Models;
 public sealed record LoginInput(string Email, string Password);
 public sealed record RefreshInput(string RefreshToken);
 public sealed record RegisterInput(string OrganizationName, string OrganizationSlug, string FirstName, string LastName, string Email, string Password);
+public sealed record LogoutInput(string RefreshToken);
 
 public sealed record VerifyMfaInput(string ChallengeToken, string Code);
 public sealed record RedeemRecoveryCodeInput(string ChallengeToken, string RecoveryCode);

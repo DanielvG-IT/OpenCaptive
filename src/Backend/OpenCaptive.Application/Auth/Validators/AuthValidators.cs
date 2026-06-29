@@ -34,6 +34,15 @@ public sealed class LoginInputValidator : AbstractValidator<LoginInput>
   }
 }
 
+public sealed class LogoutInputValidator : AbstractValidator<LogoutInput>
+{
+  public LogoutInputValidator()
+  {
+    RuleFor(x => x.RefreshToken)
+        .NotEmpty();
+  }
+}
+
 public sealed class RefreshInputValidator : AbstractValidator<RefreshInput>
 {
   public RefreshInputValidator()
