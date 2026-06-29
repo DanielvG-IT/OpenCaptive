@@ -11,19 +11,27 @@ public sealed class RegisterInputValidator : AbstractValidator<RegisterInput>
         .NotEmpty()
         .MaximumLength(200);
 
+    RuleFor(x => x.OrganizationSlug)
+        .NotEmpty()
+        .MinimumLength(3)
+        .MaximumLength(50)
+        .Matches("^[a-z][a-z-]*[a-z]$");
+
+    RuleFor(x => x.FirstName)
+        .NotEmpty()
+        .MaximumLength(100);
+
+    RuleFor(x => x.LastName)
+        .NotEmpty()
+        .MaximumLength(100);
+
     RuleFor(x => x.Email)
         .NotEmpty()
         .EmailAddress();
 
     RuleFor(x => x.Password)
-        .NotEmpty()
-        .MinimumLength(12)
-        .Matches("[A-Z]")
-        .WithMessage("Password must contain an uppercase letter.")
-        .Matches("[a-z]")
-        .WithMessage("Password must contain a lowercase letter.")
-        .Matches("[0-9]")
-        .WithMessage("Password must contain a number.");
+        .MustBeValidPassword();
+
   }
 }
 
@@ -36,6 +44,15 @@ public sealed class LoginInputValidator : AbstractValidator<LoginInput>
         .EmailAddress();
 
     RuleFor(x => x.Password)
+        .NotEmpty();
+  }
+}
+
+public sealed class LogoutInputValidator : AbstractValidator<LogoutInput>
+{
+  public LogoutInputValidator()
+  {
+    RuleFor(x => x.RefreshToken)
         .NotEmpty();
   }
 }
@@ -72,5 +89,52 @@ public sealed class VerifyMfaInputValidator : AbstractValidator<VerifyMfaInput>
         .NotEmpty()
         .Length(6)
         .Matches("^[0-9]{6}$");
+  }
+}
+
+public sealed class RedeemRecoveryCodeInputValidator : AbstractValidator<RedeemRecoveryCodeInput>
+{
+  public RedeemRecoveryCodeInputValidator()
+  {
+    RuleFor(x => x.ChallengeToken)
+        .NotEmpty();
+
+    RuleFor(x => x.RecoveryCode)
+        .NotEmpty();
+  }
+}
+
+public sealed class ResendVerifyEmailInputValidator : AbstractValidator<ResendVerifyEmailInput>
+{
+  public ResendVerifyEmailInputValidator()
+  {
+    RuleFor(x => x.Email)
+        .NotEmpty()
+        .EmailAddress();
+  }
+}
+
+public sealed class ForgotPasswordInputValidator : AbstractValidator<ForgotPasswordInput>
+{
+  public ForgotPasswordInputValidator()
+  {
+    RuleFor(x => x.Email)
+        .NotEmpty()
+        .EmailAddress();
+  }
+}
+public sealed class ResetPasswordInputValidator : AbstractValidator<ResetPasswordInput>
+{
+  public ResetPasswordInputValidator()
+  {
+    RuleFor(x => x.UserId)
+        .NotEmpty();
+
+    RuleFor(x => x.Token)
+        .NotEmpty();
+
+    RuleFor(x => x.NewPassword)
+        .NotEmpty()
+        .MustBeValidPassword();
   }
 }

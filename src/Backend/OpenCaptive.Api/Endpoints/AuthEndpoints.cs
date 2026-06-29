@@ -16,22 +16,22 @@ public static class AuthEndpoints
     // Auth
     group.MapPost("/login", Login).WithName("AuthLogin");
     group.MapPost("/refresh", Refresh).WithName("AuthRefresh");
-    // group.MapPost("/logout", Logout).RequireAuthorization().WithName("AuthLogout");
+    group.MapPost("/logout", Logout).RequireAuthorization().WithName("AuthLogout");
 
     // Registration
     group.MapPost("/register", Register).WithName("AuthRegister");
 
     // Email verification
     group.MapPost("/verify-email", VerifyEmail).WithName("AuthVerifyEmail");
-    // group.MapPost("/verify-email/resend", ResendVerificationEmail).RequireAuthorization().WithName("AuthResendVerifyEmail");
+    group.MapPost("/verify-email/resend", ResendVerificationEmail).WithName("AuthResendVerifyEmail");
 
     // Password reset
-    // group.MapPost("/forgot-password", ForgotPassword).WithName("AuthForgotPassword");
-    // group.MapPost("/reset-password", ResetPassword).WithName("AuthResetPassword");
+    group.MapPost("/forgot-password", ForgotPassword).WithName("AuthForgotPassword");
+    group.MapPost("/reset-password", ResetPassword).WithName("AuthResetPassword");
 
     // MFA
     group.MapPost("/verify-mfa", VerifyTwoFactor).WithName("AuthVerifyMfa");
-    // group.MapPost("/verify-mfa/recovery-code", VerifyTwoFactorRecovery).WithName("AuthRecoverVerifyMfa");
+    group.MapPost("/verify-mfa/recovery-code", RedeemRecoveryCode).WithName("AuthRecoverVerifyMfa");
 
     return app;
   }
@@ -78,6 +78,30 @@ public static class AuthEndpoints
     return TypedResults.Ok(result.Value);
   }
 
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> Logout(
+    HttpContext context,
+    [FromBody] LogoutInput input,
+    [FromServices] IValidator<LogoutInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var userId = context.User.GetUserId();
+
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.LogoutAsync(input, userId, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
+  }
+
   private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> Refresh(
     [FromBody] RefreshInput input,
     [FromServices] IValidator<RefreshInput> validator,
@@ -99,7 +123,7 @@ public static class AuthEndpoints
     return TypedResults.Ok(result.Value);
   }
 
-  private static async Task<Results<Ok<VerifyEmailReponse>, ValidationProblem, ProblemHttpResult>> VerifyEmail(
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> VerifyEmail(
     [FromBody] VerifyEmailInput input,
     [FromServices] IValidator<VerifyEmailInput> validator,
     [FromServices] IAuthService service,
@@ -117,7 +141,28 @@ public static class AuthEndpoints
       return result.Error.ToProblem();
     }
 
-    return TypedResults.Ok(result.Value);
+    return TypedResults.NoContent();
+  }
+
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ResendVerificationEmail(
+    [FromBody] ResendVerifyEmailInput input,
+    [FromServices] IValidator<ResendVerifyEmailInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.ResendVerifyEmailAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
   }
 
   private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> VerifyTwoFactor(
@@ -139,5 +184,68 @@ public static class AuthEndpoints
     }
 
     return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<RedeemRecoveryCodeResponse>, ValidationProblem, ProblemHttpResult>> RedeemRecoveryCode(
+    [FromBody] RedeemRecoveryCodeInput input,
+    [FromServices] IValidator<RedeemRecoveryCodeInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.RedeemRecoveryCodeAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ForgotPassword(
+    [FromBody] ForgotPasswordInput input,
+    [FromServices] IValidator<ForgotPasswordInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.ForgotPasswordAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
+  }
+
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ResetPassword(
+    [FromBody] ResetPasswordInput input,
+    [FromServices] IValidator<ResetPasswordInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.ResetPasswordAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
   }
 }
