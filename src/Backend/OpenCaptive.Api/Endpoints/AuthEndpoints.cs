@@ -26,8 +26,8 @@ public static class AuthEndpoints
     group.MapPost("/verify-email/resend", ResendVerificationEmail).WithName("AuthResendVerifyEmail");
 
     // Password reset
-    // group.MapPost("/forgot-password", ForgotPassword).WithName("AuthForgotPassword");
-    // group.MapPost("/reset-password", ResetPassword).WithName("AuthResetPassword");
+    group.MapPost("/forgot-password", ForgotPassword).WithName("AuthForgotPassword");
+    group.MapPost("/reset-password", ResetPassword).WithName("AuthResetPassword");
 
     // MFA
     group.MapPost("/verify-mfa", VerifyTwoFactor).WithName("AuthVerifyMfa");
@@ -181,5 +181,47 @@ public static class AuthEndpoints
     }
 
     return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ForgotPassword(
+    [FromBody] ForgotPasswordInput input,
+    [FromServices] IValidator<ForgotPasswordInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.ForgotPasswordAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
+  }
+
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ResetPassword(
+    [FromBody] ResetPasswordInput input,
+    [FromServices] IValidator<ResetPasswordInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.ResetPasswordAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
   }
 }

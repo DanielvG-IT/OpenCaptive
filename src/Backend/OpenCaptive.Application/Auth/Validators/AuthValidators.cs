@@ -16,14 +16,8 @@ public sealed class RegisterInputValidator : AbstractValidator<RegisterInput>
         .EmailAddress();
 
     RuleFor(x => x.Password)
-        .NotEmpty()
-        .MinimumLength(12)
-        .Matches("[A-Z]")
-        .WithMessage("Password must contain an uppercase letter.")
-        .Matches("[a-z]")
-        .WithMessage("Password must contain a lowercase letter.")
-        .Matches("[0-9]")
-        .WithMessage("Password must contain a number.");
+        .MustBeValidPassword();
+
   }
 }
 
@@ -94,5 +88,30 @@ public sealed class ResendVerifyEmailInputValidator : AbstractValidator<ResendVe
     RuleFor(x => x.Email)
         .NotEmpty()
         .EmailAddress();
+  }
+}
+
+public sealed class ForgotPasswordInputValidator : AbstractValidator<ForgotPasswordInput>
+{
+  public ForgotPasswordInputValidator()
+  {
+    RuleFor(x => x.Email)
+        .NotEmpty()
+        .EmailAddress();
+  }
+}
+public sealed class ResetPasswordInputValidator : AbstractValidator<ResetPasswordInput>
+{
+  public ResetPasswordInputValidator()
+  {
+    RuleFor(x => x.UserId)
+        .NotEmpty();
+
+    RuleFor(x => x.Token)
+        .NotEmpty();
+
+    RuleFor(x => x.NewPassword)
+        .NotEmpty()
+        .MustBeValidPassword();
   }
 }

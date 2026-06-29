@@ -36,4 +36,10 @@ public static class AuthErrors
 
     public static readonly Error VerificationEmailFailed =
         Error.Failure("auth.verification_email_failed", "Failed to send the verification email. Please try again.");
+
+    public static readonly Error PasswordResetEmailFailed =
+        Error.Failure("auth.password_reset_email_failed", "Failed to send the password reset email. Please try again.");
+
+    public static readonly Error InvalidPasswordResetToken =
+        Error.Unauthorized("auth.invalid_password_reset_token", "The password reset link is invalid or has expired.");
 }

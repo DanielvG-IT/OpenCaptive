@@ -31,6 +31,7 @@ public sealed class AuthService(
     IEmailTemplateRenderer emailTemplateRenderer,
     ITwoFactorTokenGenerator twoFactorTokenGenerator,
     IOptions<RefreshTokenOptions> refreshTokenOptions,
+    IOptions<PasswordResetOptions> passwordResetOptions,
     IOptions<EmailVerificationOptions> emailVerificationOptions
     ) : IAuthService
 {
@@ -49,6 +50,7 @@ public sealed class AuthService(
   // window, so an actively-refreshed session never expires. Decide whether to cap total session
   // age (would need an "issued/family-created at" timestamp that survives rotation).
   private readonly RefreshTokenOptions _refreshTokenOptions = refreshTokenOptions.Value;
+  private readonly PasswordResetOptions _passwordResetOptions = passwordResetOptions.Value;
   private readonly EmailVerificationOptions _emailVerificationOptions = emailVerificationOptions.Value;
 
   public async Task<Result<LoginResponse>> LoginAsync(LoginInput input, CancellationToken cancellationToken = default)
@@ -128,7 +130,18 @@ public sealed class AuthService(
 
       await transaction.CommitAsync(cancellationToken);
 
-      var isVerificationEmailSent = await SendVerificationEmail(newUser, cancellationToken);
+      bool isVerificationEmailSent;
+      try
+      {
+        await SendVerificationEmail(newUser, cancellationToken);
+        isVerificationEmailSent = true;
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Failed to send {EmailType} email to {Email}", "registration verification", newUser.Email);
+        isVerificationEmailSent = false;
+      }
+
       return Result.Success(new RegisterResponse(isVerificationEmailSent));
     }
     catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == PostgresErrorCodes.UniqueViolation)
@@ -193,10 +206,11 @@ public sealed class AuthService(
     var user = await _userManager.FindByIdAsync(input.UserId.ToString());
     if (user is null)
     {
-      return Result.Failure(AuthErrors.UserNotFound);
+      return Result.Failure(AuthErrors.InvalidEmailVerificationToken);
     }
 
-    var confirmResult = await _userManager.ConfirmEmailAsync(user, input.Token);
+    var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(input.Token));
+    var confirmResult = await _userManager.ConfirmEmailAsync(user, decodedToken);
     if (confirmResult is null || !confirmResult.Succeeded)
     {
       return Result.Failure(AuthErrors.InvalidEmailVerificationToken);
@@ -275,10 +289,56 @@ public sealed class AuthService(
       return Result.Success(); // To avoid user enumiration
     }
 
-    var isEmailSend = await SendVerificationEmail(user, cancellationToken);
-    if (!isEmailSend)
+    try
     {
+      await SendVerificationEmail(user, cancellationToken);
+      return Result.Success();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Failed to send {EmailType} email to {Email}", "verification", user.Email);
       return Result.Failure(AuthErrors.VerificationEmailFailed);
+    }
+  }
+
+  public async Task<Result> ForgotPasswordAsync(ForgotPasswordInput input, CancellationToken cancellationToken = default)
+  {
+    var user = await _userManager.FindByEmailAsync(input.Email);
+    if (user is null || !user.EmailConfirmed)
+    {
+      return Result.Success(); // To avoid user enumiration
+    }
+
+    try
+    {
+      await SendPasswordResetEmail(user, cancellationToken);
+      return Result.Success();
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Failed to send {EmailType} email to {Email}", "password reset", user.Email);
+      return Result.Failure(AuthErrors.PasswordResetEmailFailed);
+    }
+  }
+
+  public async Task<Result> ResetPasswordAsync(ResetPasswordInput input, CancellationToken cancellationToken = default)
+  {
+    var user = await _userManager.FindByIdAsync(input.UserId.ToString());
+    if (user is null)
+    {
+      return Result.Failure(AuthErrors.InvalidPasswordResetToken);
+    }
+
+    if (!user.EmailConfirmed || !user.IsActive)
+    {
+      return Result.Failure(AuthErrors.InvalidPasswordResetToken);
+    }
+
+    var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(input.Token));
+    var resetResult = await _userManager.ResetPasswordAsync(user, decodedToken, input.NewPassword);
+    if (resetResult is null || !resetResult.Succeeded)
+    {
+      return Result.Failure(AuthErrors.InvalidPasswordResetToken);
     }
 
     return Result.Success();
@@ -286,38 +346,54 @@ public sealed class AuthService(
 
 
   // ===== Helpers ======
-  private async Task<bool> SendVerificationEmail(ApplicationUser user, CancellationToken cancellationToken)
+  private async Task SendVerificationEmail(ApplicationUser user, CancellationToken cancellationToken)
   {
     var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
     var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
     var verificationUrl = _frontendLinkFactory.CreateVerifyEmailLink(user.Id, encodedToken);
 
-    try
-    {
-      var bodies = await _emailTemplateRenderer.RenderAsync(
-          EmailTemplate.VerifyEmail,
-          new VerifyEmailTemplateModel(
-            user.FirstName,
-            verificationUrl,
-            _emailVerificationOptions.TokenLifetime
-          )
-      );
+    var bodies = await _emailTemplateRenderer.RenderAsync(
+        EmailTemplate.VerifyEmail,
+        new VerifyEmailTemplateModel(
+          user.FirstName,
+          verificationUrl,
+          _emailVerificationOptions.TokenLifetime
+        )
+    );
 
-      var email = new TransactionalEmail(
-          ToAddress: user.Email!,
-          ToName: user.FirstName,
-          Subject: "OpenCaptive email verification",
-          Bodies: bodies
-      );
+    var email = new TransactionalEmail(
+        ToAddress: user.Email!,
+        ToName: user.FirstName,
+        Subject: "OpenCaptive email verification",
+        Bodies: bodies
+    );
 
-      await _emailProvider.SendAsync(email, cancellationToken);
-      return true;
-    }
-    catch (Exception ex)
-    {
-      _logger.LogError(ex, "Failed to send verification email to {Email}", user.Email);
-      return false;
-    }
+    await _emailProvider.SendAsync(email, cancellationToken);
+  }
+
+  private async Task SendPasswordResetEmail(ApplicationUser user, CancellationToken cancellationToken)
+  {
+    var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+    var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+    var verificationUrl = _frontendLinkFactory.CreateResetPasswordLink(user.Id, encodedToken);
+
+    var bodies = await _emailTemplateRenderer.RenderAsync(
+        EmailTemplate.ResetPassword,
+        new PasswordResetTemplateModel(
+          user.FirstName,
+          verificationUrl,
+          _passwordResetOptions.TokenLifetime
+        )
+    );
+
+    var email = new TransactionalEmail(
+        ToAddress: user.Email!,
+        ToName: user.FirstName,
+        Subject: "Reset your OpenCaptive password",
+        Bodies: bodies
+    );
+
+    await _emailProvider.SendAsync(email, cancellationToken);
   }
 
   private async Task MarkUserAuthenticatedAsync(ApplicationUser user)
