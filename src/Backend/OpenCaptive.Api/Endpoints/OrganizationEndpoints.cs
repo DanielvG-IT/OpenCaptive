@@ -1,4 +1,3 @@
-using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OpenCaptive.Api.Authorization;

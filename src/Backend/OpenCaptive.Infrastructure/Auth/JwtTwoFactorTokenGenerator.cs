@@ -15,7 +15,7 @@ public sealed class JwtTwoFactorTokenGenerator(IOptions<TwoFactorAuthenticationO
   private const string TwoFactorClaimName = "purpose";
   private const string TwoFactorClaimValue = "mfa-challenge";
 
-  // TODO(security, deferred): Combat JTI replay protection for challenge tokens
+  // Challenge tokens are stateless. One-time JTI enforcement requires a shared replay store.
 
   public string Generate(Guid userId)
   {

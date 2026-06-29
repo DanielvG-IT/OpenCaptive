@@ -12,11 +12,8 @@ public sealed class JwtAccessTokenGenerator(IOptions<JwtOptions> jwtOptions) : I
   private readonly JwtOptions _jwtOptions = jwtOptions.Value;
   private readonly JsonWebTokenHandler _tokenHandler = new();
 
-  // TODO(security, deferred): Persist JTI when access-token revocation,
-  // forced logout, or token blacklisting becomes a requirement. Current
-  // design relies on short-lived access tokens (15m) and refresh-token
-  // rotation/reuse detection instead of maintaining an access-token
-  // revocation store.
+  // Access-token revocation is intentionally not persisted. The current design relies on
+  // short-lived access tokens and refresh-token rotation/reuse detection.
 
   public AccessTokenResponse Generate(AccessTokenRequest request)
   {

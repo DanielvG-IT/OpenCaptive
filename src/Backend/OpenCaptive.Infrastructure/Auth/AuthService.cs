@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,10 @@ using OpenCaptive.Infrastructure.Persistence;
 
 namespace OpenCaptive.Infrastructure.Auth;
 
+[SuppressMessage(
+  "Maintainability",
+  "S107:Methods should not have too many parameters",
+  Justification = "This application service coordinates distinct authentication workflows whose dependencies are supplied by dependency injection.")]
 public sealed class AuthService(
     ITokenHasher tokenHasher,
     ILogger<AuthService> logger,
@@ -46,9 +51,9 @@ public sealed class AuthService(
   private readonly IEmailTemplateRenderer _emailTemplateRenderer = emailTemplateRenderer;
   private readonly IFrontendLinkFactory _frontendLinkFactory = frontendLinkFactory;
 
-  // TODO(security, deferred): No absolute session lifetime — every refresh resets this 30-day
-  // window, so an actively-refreshed session never expires. Decide whether to cap total session
-  // age (would need an "issued/family-created at" timestamp that survives rotation).
+  // Security tradeoff: every refresh resets the configured lifetime, so an actively refreshed
+  // session has no absolute lifetime. Adding one requires a family creation timestamp that
+  // survives token rotation.
   private readonly RefreshTokenOptions _refreshTokenOptions = refreshTokenOptions.Value;
   private readonly PasswordResetOptions _passwordResetOptions = passwordResetOptions.Value;
   private readonly EmailVerificationOptions _emailVerificationOptions = emailVerificationOptions.Value;
@@ -58,7 +63,7 @@ public sealed class AuthService(
     var user = await _userManager.FindByEmailAsync(input.Email);
     if (user is null || !user.IsActive)
     {
-      // TODO: Timing oracle mitigation: Always compute a hash to equalize response times
+      PerformDummyPasswordHash(input.Password);
       return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
     }
 
@@ -364,6 +369,17 @@ public sealed class AuthService(
     }
 
     return Result.Success();
+  }
+
+  private void PerformDummyPasswordHash(string password)
+  {
+    var dummyUser = new ApplicationUser
+    {
+      FirstName = string.Empty,
+      LastName = string.Empty
+    };
+
+    _ = _userManager.PasswordHasher.HashPassword(dummyUser, password);
   }
 
 

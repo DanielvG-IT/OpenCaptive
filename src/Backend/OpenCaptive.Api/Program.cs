@@ -12,6 +12,10 @@ namespace OpenCaptive.Api;
 
 public partial class Program
 {
+    protected Program()
+    {
+    }
+
     public static void Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();

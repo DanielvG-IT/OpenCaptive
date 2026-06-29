@@ -14,19 +14,19 @@ public sealed class OpenCaptiveDbContext(DbContextOptions<OpenCaptiveDbContext> 
   public DbSet<OrganizationMembership> OrganizationMemberships => Set<OrganizationMembership>();
   public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
-  protected override void OnModelCreating(ModelBuilder modelBuilder)
+  protected override void OnModelCreating(ModelBuilder builder)
   {
-    base.OnModelCreating(modelBuilder);
+    base.OnModelCreating(builder);
 
-    modelBuilder.Entity<ApplicationUser>().Property(x => x.FirstName)
+    builder.Entity<ApplicationUser>().Property(x => x.FirstName)
         .HasMaxLength(100)
         .IsRequired();
 
-    modelBuilder.Entity<ApplicationUser>().Property(x => x.LastName)
+    builder.Entity<ApplicationUser>().Property(x => x.LastName)
         .HasMaxLength(100)
         .IsRequired();
 
-    modelBuilder.ApplyConfigurationsFromAssembly(typeof(OpenCaptiveDbContext).Assembly);
+    builder.ApplyConfigurationsFromAssembly(typeof(OpenCaptiveDbContext).Assembly);
   }
 
   public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
