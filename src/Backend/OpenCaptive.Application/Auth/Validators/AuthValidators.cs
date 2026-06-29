@@ -11,6 +11,20 @@ public sealed class RegisterInputValidator : AbstractValidator<RegisterInput>
         .NotEmpty()
         .MaximumLength(200);
 
+    RuleFor(x => x.OrganizationSlug)
+        .NotEmpty()
+        .MinimumLength(3)
+        .MaximumLength(50)
+        .Matches("^[a-z][a-z-]*[a-z]$");
+
+    RuleFor(x => x.FirstName)
+        .NotEmpty()
+        .MaximumLength(100);
+
+    RuleFor(x => x.LastName)
+        .NotEmpty()
+        .MaximumLength(100);
+
     RuleFor(x => x.Email)
         .NotEmpty()
         .EmailAddress();
