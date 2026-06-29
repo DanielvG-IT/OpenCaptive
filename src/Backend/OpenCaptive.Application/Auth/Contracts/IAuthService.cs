@@ -9,7 +9,8 @@ public interface IAuthService
   Task<Result<RegisterResponse>> RegisterAsync(RegisterInput input, CancellationToken cancellationToken = default);
   Task<Result<TokenResponse>> RefreshAsync(RefreshInput input, CancellationToken cancellationToken = default);
 
-  Task<Result<VerifyEmailReponse>> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default);
+  Task<Result> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default);
+  Task<Result> ResendVerifyEmailAsync(ResendVerifyEmailInput input, CancellationToken cancellationToken = default);
   Task<Result<TokenResponse>> VerifyTwoFactorAsync(VerifyMfaInput input, CancellationToken cancellationToken = default);
   Task<Result<RedeemRecoveryCodeResponse>> RedeemRecoveryCodeAsync(RedeemRecoveryCodeInput input, CancellationToken cancellationToken = default);
 }

@@ -54,7 +54,6 @@ public sealed class AuthService(
   public async Task<Result<LoginResponse>> LoginAsync(LoginInput input, CancellationToken cancellationToken = default)
   {
     var user = await _userManager.FindByEmailAsync(input.Email);
-
     if (user is null || !user.IsActive)
     {
       // TODO: Timing oracle mitigation: Always compute a hash to equalize response times
@@ -62,17 +61,14 @@ public sealed class AuthService(
     }
 
     var signInResult = await _signInManager.CheckPasswordSignInAsync(user, input.Password, lockoutOnFailure: true);
-
     if (signInResult.IsLockedOut)
     {
       return Result.Success(new LoginResponse(LoginStatus.AccountLocked, null, null));
     }
-
     if (signInResult.IsNotAllowed && !await _userManager.IsEmailConfirmedAsync(user))
     {
       return Result.Success(new LoginResponse(LoginStatus.EmailVerificationRequired, null, null));
     }
-
     if (!signInResult.Succeeded)
     {
       return Result.Failure<LoginResponse>(AuthErrors.InvalidCredentials);
@@ -192,21 +188,21 @@ public sealed class AuthService(
     return Result.Success(new TokenResponse(tokens.AccessToken, tokens.AccessTokenExpiresAt, tokens.RefreshToken, tokens.RefreshTokenExpiresAt));
   }
 
-  public async Task<Result<VerifyEmailReponse>> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default)
+  public async Task<Result> VerifyEmailAsync(VerifyEmailInput input, CancellationToken cancellationToken = default)
   {
     var user = await _userManager.FindByIdAsync(input.UserId.ToString());
     if (user is null)
     {
-      return Result.Failure<VerifyEmailReponse>(AuthErrors.UserNotFound);
+      return Result.Failure(AuthErrors.UserNotFound);
     }
 
     var confirmResult = await _userManager.ConfirmEmailAsync(user, input.Token);
     if (confirmResult is null || !confirmResult.Succeeded)
     {
-      return Result.Failure<VerifyEmailReponse>(AuthErrors.InvalidEmailVerificationToken);
+      return Result.Failure(AuthErrors.InvalidEmailVerificationToken);
     }
 
-    return Result.Success(new VerifyEmailReponse(Succeeded: true));
+    return Result.Success();
   }
 
   public async Task<Result<TokenResponse>> VerifyTwoFactorAsync(VerifyMfaInput input, CancellationToken cancellationToken = default)
@@ -269,6 +265,23 @@ public sealed class AuthService(
             ),
             amountCodesLeft
         ));
+  }
+
+  public async Task<Result> ResendVerifyEmailAsync(ResendVerifyEmailInput input, CancellationToken cancellationToken = default)
+  {
+    var user = await _userManager.FindByEmailAsync(input.Email);
+    if (user is null || user.EmailConfirmed)
+    {
+      return Result.Success(); // To avoid user enumiration
+    }
+
+    var isEmailSend = await SendVerificationEmail(user, cancellationToken);
+    if (!isEmailSend)
+    {
+      return Result.Failure(AuthErrors.VerificationEmailFailed);
+    }
+
+    return Result.Success();
   }
 
 

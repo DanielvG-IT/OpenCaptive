@@ -33,4 +33,7 @@ public static class AuthErrors
 
     public static readonly Error InvalidRecoveryCode =
         Error.Unauthorized("auth.invalid_recovery_code", "The recovery code is invalid or has already been used.");
+
+    public static readonly Error VerificationEmailFailed =
+        Error.Failure("auth.verification_email_failed", "Failed to send the verification email. Please try again.");
 }

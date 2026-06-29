@@ -23,7 +23,7 @@ public static class AuthEndpoints
 
     // Email verification
     group.MapPost("/verify-email", VerifyEmail).WithName("AuthVerifyEmail");
-    // group.MapPost("/verify-email/resend", ResendVerificationEmail).RequireAuthorization().WithName("AuthResendVerifyEmail");
+    group.MapPost("/verify-email/resend", ResendVerificationEmail).WithName("AuthResendVerifyEmail");
 
     // Password reset
     // group.MapPost("/forgot-password", ForgotPassword).WithName("AuthForgotPassword");
@@ -99,7 +99,7 @@ public static class AuthEndpoints
     return TypedResults.Ok(result.Value);
   }
 
-  private static async Task<Results<Ok<VerifyEmailReponse>, ValidationProblem, ProblemHttpResult>> VerifyEmail(
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> VerifyEmail(
     [FromBody] VerifyEmailInput input,
     [FromServices] IValidator<VerifyEmailInput> validator,
     [FromServices] IAuthService service,
@@ -117,7 +117,28 @@ public static class AuthEndpoints
       return result.Error.ToProblem();
     }
 
-    return TypedResults.Ok(result.Value);
+    return TypedResults.NoContent();
+  }
+
+  private static async Task<Results<NoContent, ValidationProblem, ProblemHttpResult>> ResendVerificationEmail(
+    [FromBody] ResendVerifyEmailInput input,
+    [FromServices] IValidator<ResendVerifyEmailInput> validator,
+    [FromServices] IAuthService service,
+    CancellationToken cancellationToken)
+  {
+    var validation = await validator.ValidateAsync(input, cancellationToken);
+    if (!validation.IsValid)
+    {
+      return TypedResults.ValidationProblem(validation.ToDictionary());
+    }
+
+    var result = await service.ResendVerifyEmailAsync(input, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
   }
 
   private static async Task<Results<Ok<TokenResponse>, ValidationProblem, ProblemHttpResult>> VerifyTwoFactor(

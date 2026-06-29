@@ -86,3 +86,13 @@ public sealed class RedeemRecoveryCodeInputValidator : AbstractValidator<RedeemR
         .NotEmpty();
   }
 }
+
+public sealed class ResendVerifyEmailInputValidator : AbstractValidator<ResendVerifyEmailInput>
+{
+  public ResendVerifyEmailInputValidator()
+  {
+    RuleFor(x => x.Email)
+        .NotEmpty()
+        .EmailAddress();
+  }
+}
