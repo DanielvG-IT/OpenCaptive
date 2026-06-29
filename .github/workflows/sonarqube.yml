@@ -9,7 +9,6 @@ on:
       - "src/Frontend/apps/admin/**"
       - "src/Frontend/apps/portal/**"
       - "OpenCaptive.slnx"
-      - "sonar-project.properties"
       - ".github/workflows/sonarqube.yml"
   pull_request:
     types: [opened, synchronize, reopened]
@@ -18,7 +17,6 @@ on:
       - "src/Frontend/apps/admin/**"
       - "src/Frontend/apps/portal/**"
       - "OpenCaptive.slnx"
-      - "sonar-project.properties"
       - ".github/workflows/sonarqube.yml"
 
 permissions:
