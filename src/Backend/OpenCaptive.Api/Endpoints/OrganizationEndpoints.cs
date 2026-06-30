@@ -15,37 +15,17 @@ public static class OrganizationEndpoints
     var group = app.MapGroup("/organizations").WithTags("Organizations");
 
     // Organization Management
-    // group.MapPost("/", CreateOrganization).WithName("CreateOrganization");
-    group.MapGet("/{id:guid}", GetOrganization).WithName("GetOrganization").RequirePermission(Permissions.Organizations.Read);
-    // group.MapPatch("/{id:guid}", UpdateOrganization);
-    // group.MapDelete("/{id:guid}", DeleteOrganization);
+    group.MapGet("/{id:guid}", GetOrganization).RequirePermission(Permissions.Organizations.Read);
+    group.MapPatch("/{id:guid}", UpdateOrganization).RequirePermission(Permissions.Organizations.Update);
+    group.MapDelete("/{id:guid}", DeleteOrganization).RequirePermission(Permissions.Organizations.Delete);
 
     // Member Management
-    // group.MapGet("/{id:guid}/members", GetMembers);
+    group.MapGet("/{id:guid}/members", GetMembers).RequirePermission(Permissions.Organizations.Members.Read);
+    group.MapPost("/{id:guid}/members", AddMember).RequirePermission(Permissions.Organizations.Members.Add);
+    group.MapDelete("/{id:guid}/members/{memberId:guid}", RemoveMember).RequirePermission(Permissions.Organizations.Members.Remove);
 
     return app;
   }
-
-  // private static async Task<Results<Created<OrganizationDto>, ValidationProblem, ProblemHttpResult>> CreateOrganization(
-  //   [FromBody] CreateOrganizationInput input,
-  //   [FromServices] IValidator<CreateOrganizationInput> validator,
-  //   [FromServices] IOrganizationService service,
-  //   CancellationToken cancellationToken)
-  // {
-  //   var validation = await validator.ValidateAsync(input, cancellationToken);
-  //   if (!validation.IsValid)
-  //   {
-  //     return TypedResults.ValidationProblem(validation.ToDictionary());
-  //   }
-
-  //   var result = await service.CreateAsync(input, cancellationToken);
-  //   if (result.IsFailure)
-  //   {
-  //     return result.Error.ToProblem();
-  //   }
-
-  //   return TypedResults.Created($"/organizations/{result.Value.Id}", result.Value);
-  // }
 
   private static async Task<Results<Ok<OrganizationDto>, ProblemHttpResult>> GetOrganization(
     [FromRoute] Guid id,
@@ -59,5 +39,48 @@ public static class OrganizationEndpoints
     }
 
     return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<OrganizationDto>, ProblemHttpResult>> UpdateOrganization(
+    [FromRoute] Guid id,
+    [FromBody] UpdateOrganizationInput input,
+    [FromServices] IOrganizationService service,
+    CancellationToken cancellationToken)
+  {
+    throw new NotImplementedException();
+  }
+
+  private static async Task<Results<NoContent, ProblemHttpResult>> DeleteOrganization(
+    [FromRoute] Guid id,
+    [FromServices] IOrganizationService service,
+    CancellationToken cancellationToken)
+  {
+    throw new NotImplementedException();
+  }
+
+  private static async Task<Results<Ok<List<MemberDto>>, ProblemHttpResult>> GetMembers(
+    [FromRoute] Guid id,
+    [FromServices] IOrganizationService service,
+    CancellationToken cancellationToken)
+  {
+    throw new NotImplementedException();
+  }
+
+  private static async Task<Results<NoContent, ProblemHttpResult>> AddMember(
+    [FromRoute] Guid id,
+    [FromBody] AddMemberInput input,
+    [FromServices] IOrganizationService service,
+    CancellationToken cancellationToken)
+  {
+    throw new NotImplementedException();
+  }
+
+  private static async Task<Results<NoContent, ProblemHttpResult>> RemoveMember(
+    [FromRoute] Guid id,
+    [FromRoute] Guid memberId,
+    [FromServices] IOrganizationService service,
+    CancellationToken cancellationToken)
+  {
+    throw new NotImplementedException();
   }
 }

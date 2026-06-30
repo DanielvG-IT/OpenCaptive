@@ -17,6 +17,7 @@ public sealed class Organization : AuditableEntity
   {
     ArgumentException.ThrowIfNullOrWhiteSpace(name);
     ArgumentException.ThrowIfNullOrWhiteSpace(slug);
+    Slugs.ThrowIfInvalidSlug(slug);
 
     return new Organization
     {
@@ -35,6 +36,8 @@ public sealed class Organization : AuditableEntity
   public void ChangeSlug(string slug)
   {
     ArgumentException.ThrowIfNullOrWhiteSpace(slug);
+    Slugs.ThrowIfInvalidSlug(slug);
+
     Slug = slug;
   }
 }
