@@ -1,4 +1,4 @@
-namespace OpenCaptive.Domain.Auth;
+namespace OpenCaptive.Infrastructure.Auth;
 
 public static class OrganizationClaimTypes
 {

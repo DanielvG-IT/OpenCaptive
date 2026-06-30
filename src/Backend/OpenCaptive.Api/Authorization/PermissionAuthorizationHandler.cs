@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using OpenCaptive.Domain.Auth;
+using OpenCaptive.Infrastructure.Auth;
 using OpenCaptive.Domain.Organizations;
 
 namespace OpenCaptive.Api.Authorization;
