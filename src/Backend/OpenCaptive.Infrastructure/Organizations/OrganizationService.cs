@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using OpenCaptive.Application.Common;
 using OpenCaptive.Application.Organizations.Contracts;
 using OpenCaptive.Application.Organizations.Errors;
