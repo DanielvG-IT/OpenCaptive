@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using OpenCaptive.Api.Authentication;
 using OpenCaptive.Api.Authorization;
 using OpenCaptive.Api.Extensions;
 using OpenCaptive.Application;
+using OpenCaptive.Application.Common.Contracts;
 using OpenCaptive.Infrastructure;
 using OpenCaptive.Infrastructure.Auth;
 using Serilog;
@@ -45,6 +47,8 @@ public partial class Program
 
             var jwtOptions = builder.Configuration.GetSection("Authentication:Jwt").Get<JwtOptions>() ?? throw new InvalidOperationException("JWT configuration is missing.");
 
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<ICurrentUser, ClaimsCurrentUser>();
             builder.Services
                 .AddAuthorization()
                 .AddAuthentication(x =>

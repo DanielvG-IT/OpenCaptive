@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using OpenCaptive.Application.Common;
 using OpenCaptive.Application.Organizations.Contracts;
 using OpenCaptive.Application.Organizations.Errors;
@@ -24,27 +23,29 @@ public sealed class OrganizationService(OpenCaptiveDbContext dbContext) : IOrgan
     return Result.Success(ToDto(organization));
   }
 
-  public async Task<Result<OrganizationDto>> CreateAsync(CreateOrganizationInput input, CancellationToken cancellationToken = default)
+  public Task<Result<OrganizationDto>> UpdateAsync(Guid id, UpdateOrganizationInput input, CancellationToken cancellationToken = default)
   {
-    if (await _dbContext.Organizations.AnyAsync(x => x.Slug == input.Slug, cancellationToken))
-    {
-      return Result.Failure<OrganizationDto>(OrganizationErrors.SlugAlreadyExists(input.Slug));
-    }
+    throw new NotImplementedException();
+  }
 
-    var organization = Organization.Create(input.Name, input.Slug);
+  public Task<Result<OrganizationDto>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+  {
+    throw new NotImplementedException();
+  }
 
-    _dbContext.Organizations.Add(organization);
+  public Task<Result<List<MemberDto>>> GetMembersAsync(Guid id, CancellationToken cancellationToken = default)
+  {
+    throw new NotImplementedException();
+  }
 
-    try
-    {
-      await _dbContext.SaveChangesAsync(cancellationToken);
-    }
-    catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
-    {
-      return Result.Failure<OrganizationDto>(OrganizationErrors.SlugAlreadyExists(input.Slug));
-    }
+  public Task<Result<OrganizationDto>> AddMemberAsync(Guid id, AddMemberInput input, CancellationToken cancellationToken = default)
+  {
+    throw new NotImplementedException();
+  }
 
-    return Result.Success(ToDto(organization));
+  public Task<Result<OrganizationDto>> RemoveMemberAsync(Guid id, Guid memberId, CancellationToken cancellationToken = default)
+  {
+    throw new NotImplementedException();
   }
 
   private static OrganizationDto ToDto(Organization organization) => new(organization.Id, organization.Name, organization.Slug);

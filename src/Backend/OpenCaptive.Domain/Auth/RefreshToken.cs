@@ -11,24 +11,15 @@ public sealed class RefreshToken : AuditableEntity
   public DateTimeOffset? RevokedAt { get; private set; }
   public Guid FamilyId { get; private set; }
 
-  // Required by EF Core for materialization.
-  private RefreshToken()
-  {
-  }
+  private RefreshToken() { } // Required by EF Core for materialization.
 
   public static RefreshToken Create(Guid userId, string tokenHash, string securityStamp, DateTimeOffset expiresAt, Guid familyId)
   {
     ArgumentException.ThrowIfNullOrWhiteSpace(tokenHash);
     ArgumentException.ThrowIfNullOrWhiteSpace(securityStamp);
-
-    if (userId == Guid.Empty)
-      throw new ArgumentException("User ID must not be empty.", nameof(userId));
-
-    if (familyId == Guid.Empty)
-      throw new ArgumentException("Family ID must not be empty.", nameof(familyId));
-
-    if (expiresAt <= DateTimeOffset.UtcNow)
-      throw new ArgumentException("Expiry time must be in the future.", nameof(expiresAt));
+    ArgumentOutOfRangeException.ThrowIfEqual(userId, Guid.Empty, nameof(userId));
+    ArgumentOutOfRangeException.ThrowIfEqual(familyId, Guid.Empty, nameof(familyId));
+    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(expiresAt, DateTimeOffset.UtcNow, nameof(expiresAt));
 
     return new RefreshToken
     {

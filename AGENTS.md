@@ -93,3 +93,21 @@ Before you send anything, ask yourself:
 - [ ] Did I explain the *why*, not just the *what*?
 
 If in doubt, give less code and more understanding.
+
+---
+
+## .NET / ASP.NET Core architecture preferences
+
+These add to, not override, the global stack-agnostic principles and everything above — the Prime Directive and mentorship rules still apply when discussing any of this.
+
+**Open question, not yet decided — do not assume an answer:** Vertical Slice Architecture (each feature owns its endpoints/handlers/validators/mappings in one folder, cutting across layers) is a commonly recommended pattern for ASP.NET Core SaaS APIs, but it conflicts with this repo's current structure — `OpenCaptive.Domain` / `Application` / `Infrastructure` / `Api` as separate class-library projects is Clean/Onion architecture, organized by layer first, by feature second. Don't silently nudge code toward either pattern; if a change touches this boundary, surface the tension explicitly and let Daniël decide whether to migrate, stay, or hybridize.
+
+**Error handling:** use `IExceptionHandler` + `IProblemDetailsService` (RFC 9457 ProblemDetails), with focused handlers per failure category (validation, not-found, conflict, unauthorized, forbidden) rather than one catch-all handler or giant try/catch blocks.
+
+**Data access (EF Core):** use named query filters for soft-delete and tenant scoping. Don't wrap EF Core in a repository abstraction just because "repositories are a pattern" — only add an abstraction where the underlying implementation might actually change. For parallel/concurrent EF Core queries, use `IDbContextFactory` — never share a single `DbContext` across concurrent operations.
+
+**Real-time features:** prefer Server-Sent Events over SignalR when communication is server-to-client only — SSE is simpler and sufficient for that case; reach for SignalR only when bidirectional communication is actually needed.
+
+**Testing:** integration tests via Testcontainers (real Postgres) + `WebApplicationFactory` with real auth and real migrations, per the global testing principle of avoiding mocked infrastructure.
+
+**Code style:** modern C# — records, required members, file-scoped namespaces, nullable reference types, primary constructors where appropriate, pattern matching, async/await throughout. Keep methods short, dependencies explicit, classes small.

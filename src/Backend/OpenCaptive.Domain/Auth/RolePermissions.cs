@@ -4,13 +4,22 @@ namespace OpenCaptive.Domain.Auth;
 
 public static class RolePermissions
 {
-  private static readonly IReadOnlyDictionary<OrganizationRole, IReadOnlySet<string>> Map = new Dictionary<OrganizationRole, IReadOnlySet<string>>
+  private static readonly Dictionary<OrganizationRole, IReadOnlySet<string>> Map = new()
   {
     [OrganizationRole.Owner] = new HashSet<string>
     {
       Permissions.Organizations.Read,
       Permissions.Organizations.Update,
       Permissions.Organizations.Delete,
+
+      Permissions.Organizations.Members.Read,
+      Permissions.Organizations.Members.Add,
+      Permissions.Organizations.Members.Remove,
+
+      Permissions.Sites.Create,
+      Permissions.Sites.Read,
+      Permissions.Sites.Update,
+      Permissions.Sites.Delete
     },
     [OrganizationRole.Administrator] = new HashSet<string>
     {
