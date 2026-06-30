@@ -1,25 +1,33 @@
 using OpenCaptive.Domain.Common;
 
-namespace OpenCaptive.Domain.Organizations;
+namespace OpenCaptive.Domain.Sites;
 
-public sealed class Organization : AuditableEntity
+public sealed class Site : AuditableEntity
 {
+  public Guid OrganizationId { get; private set; }
   public string Name { get; private set; } = null!;
   public string Slug { get; private set; } = null!;
+  public string? Description { get; private set; }
+  public string TimeZone { get; private set; } = "UTC";
   public bool IsEnabled { get; private set; } = true;
 
-  private Organization() { } // Required by EF Core for materialization.
+  private Site() { } // Required by EF Core for materialization.
 
-  public static Organization Create(string name, string slug)
+  public static Site Create(Guid organizationId, string name, string slug, string timeZone, string? description)
   {
+    ArgumentOutOfRangeException.ThrowIfEqual(organizationId, Guid.Empty, nameof(organizationId));
     ArgumentException.ThrowIfNullOrWhiteSpace(name);
     Slugs.ThrowIfInvalidSlug(slug);
 
-    return new Organization
+    return new Site
     {
       Id = Guid.CreateVersion7(),
       Name = name,
       Slug = slug,
+      TimeZone = timeZone,
+      Description = description,
+      IsEnabled = true,
+      OrganizationId = organizationId
     };
   }
 
@@ -31,9 +39,7 @@ public sealed class Organization : AuditableEntity
 
   public void ChangeSlug(string slug)
   {
-    ArgumentException.ThrowIfNullOrWhiteSpace(slug);
     Slugs.ThrowIfInvalidSlug(slug);
-
     Slug = slug;
   }
 

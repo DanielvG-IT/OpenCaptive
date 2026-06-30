@@ -19,6 +19,7 @@ public static partial class Slugs
 
   public static void ThrowIfInvalidSlug(string slug)
   {
+    ArgumentException.ThrowIfNullOrWhiteSpace(slug);
     if (!CheckSlug(slug))
     {
       throw new ArgumentException("The provided slug is invalid. It must be lowercase, alphanumeric, and can only contain internal hyphens.", nameof(slug));
