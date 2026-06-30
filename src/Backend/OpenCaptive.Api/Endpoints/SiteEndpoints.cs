@@ -16,10 +16,10 @@ public static class SiteEndpoints
         .RequireAuthorization();
 
     // Site Management 
-    group.MapPost("/", CreateSite).RequirePermission(Permissions.Sites.Read);
-    group.MapGet("/{id:guid}", GetSite);
-    group.MapPatch("/{id:guid}", UpdateSite);
-    group.MapDelete("/{id:guid}", DeleteSite);
+    group.MapPost("/", CreateSite).RequirePermission(Permissions.Sites.Create);
+    group.MapGet("/{id:guid}", GetSite).RequirePermission(Permissions.Sites.Read);
+    group.MapPatch("/{id:guid}", UpdateSite).RequirePermission(Permissions.Sites.Update);
+    group.MapDelete("/{id:guid}", DeleteSite).RequirePermission(Permissions.Sites.Delete);
 
     return app;
   }
