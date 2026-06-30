@@ -13,8 +13,8 @@ public sealed class PortalVersion : AuditableEntity
 
   public static PortalVersion Create(Guid portalId, int version, string content)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(portalId, Guid.Empty, nameof(portalId));
-    ArgumentOutOfRangeException.ThrowIfLessThan(version, 1, nameof(version));
+    ArgumentOutOfRangeException.ThrowIfEqual(portalId, Guid.Empty);
+    ArgumentOutOfRangeException.ThrowIfLessThan(version, 1);
     ArgumentException.ThrowIfNullOrWhiteSpace(content);
 
     return new PortalVersion

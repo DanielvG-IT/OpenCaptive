@@ -17,9 +17,9 @@ public sealed class RefreshToken : AuditableEntity
   {
     ArgumentException.ThrowIfNullOrWhiteSpace(tokenHash);
     ArgumentException.ThrowIfNullOrWhiteSpace(securityStamp);
-    ArgumentOutOfRangeException.ThrowIfEqual(userId, Guid.Empty, nameof(userId));
-    ArgumentOutOfRangeException.ThrowIfEqual(familyId, Guid.Empty, nameof(familyId));
-    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(expiresAt, DateTimeOffset.UtcNow, nameof(expiresAt));
+    ArgumentOutOfRangeException.ThrowIfEqual(userId, Guid.Empty);
+    ArgumentOutOfRangeException.ThrowIfEqual(familyId, Guid.Empty);
+    ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(expiresAt, DateTimeOffset.UtcNow);
 
     return new RefreshToken
     {

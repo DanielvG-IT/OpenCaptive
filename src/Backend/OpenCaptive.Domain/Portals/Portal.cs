@@ -13,7 +13,7 @@ public sealed class Portal : AuditableEntity
 
   public static Portal Create(Guid networkId, string name)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(networkId, Guid.Empty, nameof(networkId));
+    ArgumentOutOfRangeException.ThrowIfEqual(networkId, Guid.Empty);
     ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
     return new Portal
@@ -32,7 +32,7 @@ public sealed class Portal : AuditableEntity
 
   public void Publish(Guid versionId)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(versionId, Guid.Empty, nameof(versionId));
+    ArgumentOutOfRangeException.ThrowIfEqual(versionId, Guid.Empty);
 
     IsPublished = true;
     PublishedVersionId = versionId;

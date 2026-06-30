@@ -16,7 +16,7 @@ public sealed class SiteIntegration : AuditableEntity
 
   public static SiteIntegration Create(Guid siteId, string provider, string displayName)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(siteId, Guid.Empty, nameof(siteId));
+    ArgumentOutOfRangeException.ThrowIfEqual(siteId, Guid.Empty);
     ArgumentException.ThrowIfNullOrWhiteSpace(provider);
     ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
 

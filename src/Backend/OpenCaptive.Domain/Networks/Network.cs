@@ -15,8 +15,8 @@ public sealed class Network : AuditableEntity
 
   public static Network Create(Guid siteId, Guid siteIntegrationId, string providerNetworkId, string name, bool isGuestNetwork)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(siteId, Guid.Empty, nameof(siteId));
-    ArgumentOutOfRangeException.ThrowIfEqual(siteIntegrationId, Guid.Empty, nameof(siteIntegrationId));
+    ArgumentOutOfRangeException.ThrowIfEqual(siteId, Guid.Empty);
+    ArgumentOutOfRangeException.ThrowIfEqual(siteIntegrationId, Guid.Empty);
     ArgumentException.ThrowIfNullOrWhiteSpace(providerNetworkId);
     ArgumentException.ThrowIfNullOrWhiteSpace(name);
 

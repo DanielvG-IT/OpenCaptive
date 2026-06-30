@@ -15,8 +15,8 @@ public sealed class OrganizationMembership : AuditableEntity
 
   public static OrganizationMembership Create(Guid userId, Guid orgId, OrganizationRole role)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(userId, Guid.Empty, nameof(userId));
-    ArgumentOutOfRangeException.ThrowIfEqual(orgId, Guid.Empty, nameof(orgId));
+    ArgumentOutOfRangeException.ThrowIfEqual(userId, Guid.Empty);
+    ArgumentOutOfRangeException.ThrowIfEqual(orgId, Guid.Empty);
 
     if (!Enum.IsDefined(role))
       throw new ArgumentException("Role must be a valid OrganizationRole value.", nameof(role));

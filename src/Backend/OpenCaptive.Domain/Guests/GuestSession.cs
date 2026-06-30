@@ -17,8 +17,8 @@ public sealed class GuestSession : AuditableEntity
 
   public static GuestSession Create(Guid siteId, Guid networkId, string clientMacAddress, string? clientIpAddress)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(siteId, Guid.Empty, nameof(siteId));
-    ArgumentOutOfRangeException.ThrowIfEqual(networkId, Guid.Empty, nameof(networkId));
+    ArgumentOutOfRangeException.ThrowIfEqual(siteId, Guid.Empty);
+    ArgumentOutOfRangeException.ThrowIfEqual(networkId, Guid.Empty);
     ArgumentException.ThrowIfNullOrWhiteSpace(clientMacAddress);
 
     return new GuestSession

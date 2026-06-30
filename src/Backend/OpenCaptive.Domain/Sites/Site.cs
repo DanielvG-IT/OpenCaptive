@@ -15,7 +15,7 @@ public sealed class Site : AuditableEntity
 
   public static Site Create(Guid organizationId, string name, string slug, string timeZone, string? description)
   {
-    ArgumentOutOfRangeException.ThrowIfEqual(organizationId, Guid.Empty, nameof(organizationId));
+    ArgumentOutOfRangeException.ThrowIfEqual(organizationId, Guid.Empty);
     ArgumentException.ThrowIfNullOrWhiteSpace(name);
     Slugs.ThrowIfInvalidSlug(slug);
 
