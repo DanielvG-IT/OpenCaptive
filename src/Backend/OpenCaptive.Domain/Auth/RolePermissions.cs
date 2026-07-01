@@ -12,12 +12,13 @@ public static class RolePermissions
       Permissions.Organizations.Update,
       Permissions.Organizations.Delete,
 
-      Permissions.Organizations.Members.Read,
-      Permissions.Organizations.Members.Add,
-      Permissions.Organizations.Members.Remove,
+      Permissions.Members.Read,
+      Permissions.Members.Add,
+      Permissions.Members.Remove,
 
       Permissions.Sites.Create,
-      Permissions.Sites.Read,
+      Permissions.Sites.ReadAll,
+      Permissions.Sites.ReadOne,
       Permissions.Sites.Update,
       Permissions.Sites.Delete
     },

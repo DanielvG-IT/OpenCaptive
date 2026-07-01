@@ -20,9 +20,9 @@ public static class OrganizationEndpoints
     group.MapDelete("/{id:guid}", DeleteOrganization).RequirePermission(Permissions.Organizations.Delete);
 
     // Member Management
-    group.MapGet("/{id:guid}/members", GetMembers).RequirePermission(Permissions.Organizations.Members.Read);
-    group.MapPost("/{id:guid}/members", AddMember).RequirePermission(Permissions.Organizations.Members.Add);
-    group.MapDelete("/{id:guid}/members/{memberId:guid}", RemoveMember).RequirePermission(Permissions.Organizations.Members.Remove);
+    group.MapGet("/{id:guid}/members", GetMembers).RequirePermission(Permissions.Members.Read);
+    group.MapPost("/{id:guid}/members", AddMember).RequirePermission(Permissions.Members.Add);
+    group.MapDelete("/{id:guid}/members/{memberId:guid}", RemoveMember).RequirePermission(Permissions.Members.Remove);
 
     return app;
   }

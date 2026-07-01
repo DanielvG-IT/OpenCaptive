@@ -1,8 +1,7 @@
 using FluentValidation;
-using OpenCaptive.Application.Sites.Models;
 using OpenCaptive.Domain.Common;
 
-namespace OpenCaptive.Application.Sites.Validators;
+namespace OpenCaptive.Application.Sites;
 
 public sealed class CreateSiteInputValidator : AbstractValidator<CreateSiteInput>
 {

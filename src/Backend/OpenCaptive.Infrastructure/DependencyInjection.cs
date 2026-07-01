@@ -4,12 +4,14 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenCaptive.Application.Email.Contracts;
 using OpenCaptive.Application.Organizations.Contracts;
 using OpenCaptive.Application.Profile;
+using OpenCaptive.Application.Sites;
 using OpenCaptive.Infrastructure.Auth;
 using OpenCaptive.Infrastructure.Email;
 using OpenCaptive.Infrastructure.Frontend;
 using OpenCaptive.Infrastructure.Organizations;
 using OpenCaptive.Infrastructure.Persistence;
 using OpenCaptive.Infrastructure.Profile;
+using OpenCaptive.Infrastructure.Sites;
 
 namespace OpenCaptive.Infrastructure;
 
@@ -27,6 +29,7 @@ public static class DependencyInjection
 
     services.AddScoped<IOrganizationService, OrganizationService>();
     services.AddScoped<IProfileService, ProfileService>();
+    services.AddScoped<ISiteService, SiteService>();
 
     services.AddScoped<IFrontendLinkFactory, FrontendLinkFactory>();
 

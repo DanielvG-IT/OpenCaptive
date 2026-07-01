@@ -31,16 +31,27 @@ public sealed class Site : AuditableEntity
     };
   }
 
-  public void Rename(string name)
+  public void UpdateName(string name)
   {
     ArgumentException.ThrowIfNullOrWhiteSpace(name);
     Name = name;
   }
 
-  public void ChangeSlug(string slug)
+  public void UpdateSlug(string slug)
   {
     Slugs.ThrowIfInvalidSlug(slug);
     Slug = slug;
+  }
+
+  public void UpdateTimeZone(string timeZone)
+  {
+    ArgumentException.ThrowIfNullOrWhiteSpace(timeZone);
+    TimeZone = timeZone;
+  }
+
+  public void UpdateDescription(string? description)
+  {
+    Description = description;
   }
 
   public void Enable()
