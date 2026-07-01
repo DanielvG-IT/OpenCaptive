@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using OpenCaptive.Api.Authentication;
 using OpenCaptive.Api.Authorization;
+using OpenCaptive.Api.Errors;
 using OpenCaptive.Api.Extensions;
 using OpenCaptive.Application;
 using OpenCaptive.Application.Common.Contracts;
@@ -14,9 +15,7 @@ namespace OpenCaptive.Api;
 
 public partial class Program
 {
-    protected Program()
-    {
-    }
+    protected Program() { }
 
     public static void Main(string[] args)
     {
@@ -31,9 +30,18 @@ public partial class Program
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext());
 
-            // TODO: Add OpenTelemetry (tracing + metrics) and immutable audit trail for all mutations (AVG/GDPR, NIS2, ISO 27001, NEN 7510 compliance for all tenants).
+            builder.Services.AddProblemDetails(options =>
+            {
+                options.CustomizeProblemDetails = context =>
+                {
+                    var traceId = System.Diagnostics.Activity.Current?.Id ?? context.HttpContext.TraceIdentifier;
+                    context.ProblemDetails.Extensions["traceId"] = traceId;
+                };
+            });
+            builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+            // TODO: Add OpenTelemetry (tracing + metrics)
             builder.Services.AddOpenApi();
-            builder.Services.AddProblemDetails();
             builder.Services.AddHealthChecks();
             builder.Services.AddCors(options => options.AddPolicy("Default", policy =>
                 policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [])
@@ -95,8 +103,7 @@ public partial class Program
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.MapHealthChecks("/health");
-            app.MapEndpoints("/api");
+            app.MapEndpoints();
 
             app.Run();
         }
