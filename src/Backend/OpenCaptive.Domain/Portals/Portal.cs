@@ -18,7 +18,7 @@ public sealed class Portal : AuditableEntity
 
     return new Portal
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       NetworkId = networkId,
       Name = name,
     };

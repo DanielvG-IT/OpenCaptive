@@ -23,7 +23,7 @@ public sealed class GuestSession : AuditableEntity
 
     return new GuestSession
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       SiteId = siteId,
       NetworkId = networkId,
       ClientMacAddress = clientMacAddress,

@@ -22,7 +22,7 @@ public sealed class Network : AuditableEntity
 
     return new Network
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       SiteId = siteId,
       SiteIntegrationId = siteIntegrationId,
       ProviderNetworkId = providerNetworkId,

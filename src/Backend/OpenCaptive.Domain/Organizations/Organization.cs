@@ -17,7 +17,7 @@ public sealed class Organization : AuditableEntity
 
     return new Organization
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       Name = name,
       Slug = slug,
     };

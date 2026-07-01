@@ -19,7 +19,7 @@ public sealed class PortalVersion : AuditableEntity
 
     return new PortalVersion
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       PortalId = portalId,
       Version = version,
       IsPublished = false,

@@ -23,7 +23,7 @@ public sealed class RefreshToken : AuditableEntity
 
     return new RefreshToken
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       TokenHash = tokenHash,
       SecurityStamp = securityStamp,
       UserId = userId,

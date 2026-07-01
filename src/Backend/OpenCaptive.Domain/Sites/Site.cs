@@ -21,7 +21,7 @@ public sealed class Site : AuditableEntity
 
     return new Site
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       Name = name,
       Slug = slug,
       TimeZone = timeZone,

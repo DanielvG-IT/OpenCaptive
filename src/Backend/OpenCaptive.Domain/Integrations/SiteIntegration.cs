@@ -22,7 +22,7 @@ public sealed class SiteIntegration : AuditableEntity
 
     return new SiteIntegration
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       SiteId = siteId,
       Provider = provider,
       DisplayName = displayName,

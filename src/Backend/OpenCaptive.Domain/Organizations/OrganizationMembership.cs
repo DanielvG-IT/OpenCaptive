@@ -23,7 +23,7 @@ public sealed class OrganizationMembership : AuditableEntity
 
     return new OrganizationMembership
     {
-      Id = Guid.CreateVersion7(),
+      Id = NewId(),
       UserId = userId,
       OrganizationId = orgId,
       Role = role
