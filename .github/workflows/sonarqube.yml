@@ -95,7 +95,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: powershell
         run: |
-          & "${{ runner.temp }}\scanner\dotnet-sonarscanner" begin /k:"DanielvG-IT_OpenCaptive_Api" /o:"danielvanginneken" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.exclusions="src/Frontend/**"
+          & "${{ runner.temp }}\scanner\dotnet-sonarscanner" begin /k:"DanielvG-IT_OpenCaptive_Api" /o:"danielvanginneken" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.exclusions="src/Frontend/**,**/Migrations/**" /d:sonar.cpd.exclusions="**/Migrations/**"
           dotnet build OpenCaptive.slnx --configuration Release
           & "${{ runner.temp }}\scanner\dotnet-sonarscanner" end /d:sonar.token="$env:SONAR_TOKEN"
 
