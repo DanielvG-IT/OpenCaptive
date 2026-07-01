@@ -39,7 +39,7 @@ jobs:
 
       - name: Generate CycloneDX SBOM
         run: >
-          ./.tools/dotnet-CycloneDX OpenCaptive.slnx
+          ./.tools/dotnet-cyclonedx OpenCaptive.slnx
           --output artifacts/sbom
           --filename backend.cdx.json
           --output-format Json

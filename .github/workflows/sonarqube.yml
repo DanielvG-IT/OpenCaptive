@@ -23,8 +23,32 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detect changed paths
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      admin: ${{ steps.filter.outputs.admin }}
+      portal: ${{ steps.filter.outputs.portal }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          filters: |
+            backend:
+              - 'src/Backend/**'
+              - 'OpenCaptive.slnx'
+            admin:
+              - 'src/Frontend/apps/admin/**'
+            portal:
+              - 'src/Frontend/apps/portal/**'
+
   api:
     name: Analyze .NET WebAPI
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: windows-latest
     steps:
       - name: Set up JDK 17
@@ -68,14 +92,17 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: powershell
         run: |
-          & "${{ runner.temp }}\scanner\dotnet-sonarscanner" begin /k:"DanielvG-IT_OpenCaptive_Api" /o:"danielvanginneken" /d:sonar.token="$env:SONAR_TOKEN"
+          & "${{ runner.temp }}\scanner\dotnet-sonarscanner" begin /k:"DanielvG-IT_OpenCaptive_Api" /o:"danielvanginneken" /d:sonar.token="$env:SONAR_TOKEN" /d:sonar.exclusions="src/Frontend/**"
           dotnet build OpenCaptive.slnx --configuration Release
           & "${{ runner.temp }}\scanner\dotnet-sonarscanner" end /d:sonar.token="$env:SONAR_TOKEN"
 
   admin:
     name: Analyze NextJS Admin
+    needs: changes
+    if: needs.changes.outputs.admin == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -89,9 +116,12 @@ jobs:
           projectBaseDir: src/Frontend/apps/admin
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_ADMIN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   portal:
     name: Analyze NextJS Portal
+    needs: changes
+    if: needs.changes.outputs.portal == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -105,3 +135,4 @@ jobs:
           projectBaseDir: src/Frontend/apps/portal
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_PORTAL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
