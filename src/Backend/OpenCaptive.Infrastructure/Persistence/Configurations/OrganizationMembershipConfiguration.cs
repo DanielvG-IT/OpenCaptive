@@ -13,6 +13,8 @@ public sealed class OrganizationMembershipConfiguration : IEntityTypeConfigurati
 
     builder.HasKey(x => x.Id);
 
+    builder.Property(x => x.Role);
+
     // Single-org for now: relax to (UserId, OrganizationId) when multi-org lands.
     builder.HasIndex(x => x.UserId)
       .IsUnique();

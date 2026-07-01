@@ -22,6 +22,12 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
       .IsRequired()
       .HasMaxLength(256);
 
+    builder.Property(x => x.ExpiresAt);
+
+    builder.Property(x => x.RevokedAt);
+
+    builder.Property(x => x.FamilyId);
+
     builder.HasIndex(x => x.TokenHash)
       .IsUnique();
 
