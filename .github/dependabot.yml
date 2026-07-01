@@ -20,7 +20,7 @@ updates:
 
   # ---- Backend: .NET (NuGet) -----------------------------------------------
   - package-ecosystem: "nuget"
-    directory: "/src/Backend"
+    directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -48,9 +48,11 @@ updates:
           - "minor"
           - "patch"
 
-  # ---- Frontend: Admin (npm) ----------------------------------------------
+  # ---- Frontend: NextJS Apps (npm) -----------------------------------------
   - package-ecosystem: "npm"
-    directory: "/src/Frontend/apps/admin"
+    directories:
+      - "/src/Frontend/apps/admin"
+      - "/src/Frontend/apps/portal"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -60,40 +62,12 @@ updates:
       - "frontend"
     commit-message:
       prefix: "chore"
-    groups:
-      next-react-core:
-        patterns:
-          - "next"
-          - "eslint-config-next"
-          - "react"
-          - "react-dom"
-          - "@types/react"
-          - "@types/react-dom"
-      dev-tooling:
-        patterns:
-          - "@types/*"
-          - "eslint*"
-          - "prettier"
-          - "typescript"
-      minor-and-patch:
-        patterns:
-          - "*"
+    ignore:
+      # Next.js ESLint plugin currently doesn't support ESLint v9/v10 gracefully.
+      # This pauses major upgrades for ESLint packages until Next catches up.
+      - dependency-name: "eslint*"
         update-types:
-          - "minor"
-          - "patch"
-
-  # ---- Frontend: Portal (npm) ---------------------------------------------
-  - package-ecosystem: "npm"
-    directory: "/src/Frontend/apps/portal"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
-    labels:
-      - "dependencies"
-      - "frontend"
-    commit-message:
-      prefix: "chore"
+          - "version-update:semver-major"
     groups:
       next-react-core:
         patterns:
