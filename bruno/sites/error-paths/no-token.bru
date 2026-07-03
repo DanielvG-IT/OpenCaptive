@@ -1,0 +1,16 @@
+meta {
+  name: No Token (expect 401)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/sites
+  body: none
+  auth: none
+}
+
+docs {
+  Phase 1 sanity check: hitting a protected route with no Authorization
+  header should return 401 before any org/permission logic runs.
+}

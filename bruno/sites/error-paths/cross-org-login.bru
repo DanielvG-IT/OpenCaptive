@@ -1,0 +1,29 @@
+meta {
+  name: Cross-Org - Login 2nd User
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "other@opencaptive.local",
+    "password": "Password123!"
+  }
+}
+
+script:post-response {
+  if (res.body.tokens) {
+    bru.setEnvVar("accessTokenB", res.body.tokens.accessToken);
+  }
+}
+
+docs {
+  Stores the 2nd org's token separately (accessTokenB) so it doesn't
+  clobber the primary accessToken used by every other request.
+}

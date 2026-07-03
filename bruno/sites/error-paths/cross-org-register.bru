@@ -1,0 +1,27 @@
+meta {
+  name: Cross-Org - Register 2nd User
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "organizationName": "Other Org",
+    "organizationSlug": "other-org",
+    "firstName": "Other",
+    "lastName": "User",
+    "email": "other@opencaptive.local",
+    "password": "Password123!"
+  }
+}
+
+docs {
+  Creates a 2nd org so we can prove the IDOR collapse: this org's
+  token must NOT be able to see org A's site.
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Verify Email
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/verify-email
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userId": "019f24ed-bc3b-76d3-bf6d-dc0a4bee59ff",
+    "token": "Q2ZESjhJTStEMXNmVEZkTm5GT2x0UFc1M2Z6aE13U25RNjFmekZkalVkSDVQTHB1dEZjcmJSMTdjcnVWMnYrWnpXamo3cjVNREFQcnEwblo1SmtrL0x5TjMxdFk2emhkUFJpMEVsaHhCR1RrZkRudjNsZ21WS0pQY3JFbllsM2NZbnlPdlRrNnJuSDVWcyt2L0NBeXJkcU9YSlM0WVFDTkRjSFRvd3JFUXV5dGNMZ29tL2ZPY1lYUmhlYmUzZUM3ZnY1OXp0a3dLQjJFYzBzZ2xXRGhZZGs1bFd2NDJFajVZN0NmWUdMQzJJZHkyUlp5SEZRNzBmNG9nMFNEVkNINU1mVjVPZz09"
+  }
+}
+
+docs {
+  Register doesn't return a userId or token — grab both from the
+  verification email caught by Papercut (http://localhost:37408).
+}

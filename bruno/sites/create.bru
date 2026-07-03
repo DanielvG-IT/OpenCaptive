@@ -1,0 +1,30 @@
+meta {
+  name: Create Site
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/sites
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Main Warehouse",
+    "slug": "main-warehouse",
+    "timeZone": "Europe/Amsterdam",
+    "description": "Primary distribution site"
+  }
+}
+
+script:post-response {
+  if (res.body.id) {
+    bru.setEnvVar("siteId", res.body.id);
+  }
+}

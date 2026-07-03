@@ -1,0 +1,20 @@
+meta {
+  name: Cross-Org - Get Org A's Site (expect 404)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/sites/{{siteId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessTokenB}}
+}
+
+docs {
+  Org B's token hitting Org A's siteId. Must return 404, not 403 —
+  that's the IDOR collapse: existence isn't leaked to the wrong org.
+}
