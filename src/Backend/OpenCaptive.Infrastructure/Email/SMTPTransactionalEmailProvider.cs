@@ -30,8 +30,15 @@ public sealed class SmtpTransactionalEmailProvider(IOptions<EmailOptions> emailO
       TextBody = email.Bodies.TextBody
     }.ToMessageBody();
 
-    // Use StartTls to prevent downgrade attacks
-    var sslMode = _emailOptions.Smtp.EnableSsl ? SecureSocketOptions.SslOnConnect : SecureSocketOptions.StartTls;
+    // Map domain enum to MailKit's SecureSocketOptions
+    var sslMode = _emailOptions.Smtp.SecurityMode switch
+    {
+      SmtpSecurityMode.None => SecureSocketOptions.None,
+      SmtpSecurityMode.StartTls => SecureSocketOptions.StartTls,
+      SmtpSecurityMode.SslOnConnect => SecureSocketOptions.SslOnConnect,
+      SmtpSecurityMode.Auto => SecureSocketOptions.Auto,
+      _ => throw new InvalidOperationException($"An invalid or unsupported SMTP security mode '{_emailOptions.Smtp.SecurityMode}' was configured in EmailOptions.")
+    };
 
     using var smtp = new SmtpClient();
     smtp.Timeout = (int)_emailOptions.Smtp.Timeout.TotalMilliseconds;
@@ -46,6 +53,6 @@ public sealed class SmtpTransactionalEmailProvider(IOptions<EmailOptions> emailO
     await smtp.SendAsync(message, cancellationToken);
     await smtp.DisconnectAsync(quit: true, cancellationToken);
 
-    _logger.LogInformation("Sent transactional email '{Subject}' to {Recipient}", email.Subject, email.ToAddress);
+    _logger.LogInformation("Sent transactional email '{Subject}' to {Recipient} using security mode {Mode}", email.Subject, email.ToAddress, sslMode);
   }
 }
