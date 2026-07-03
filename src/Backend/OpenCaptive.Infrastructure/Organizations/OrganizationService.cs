@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OpenCaptive.Application.Common;
+using OpenCaptive.Application.Common.Contracts;
 using OpenCaptive.Application.Organizations.Contracts;
 using OpenCaptive.Application.Organizations.Errors;
 using OpenCaptive.Application.Organizations.Models;
@@ -8,12 +9,19 @@ using OpenCaptive.Infrastructure.Persistence;
 
 namespace OpenCaptive.Infrastructure.Organizations;
 
-public sealed class OrganizationService(OpenCaptiveDbContext dbContext) : IOrganizationService
+public sealed class OrganizationService(OpenCaptiveDbContext dbContext, ICurrentUser currentUser) : IOrganizationService
 {
   private readonly OpenCaptiveDbContext _dbContext = dbContext;
+  private readonly ICurrentUser _currentUser = currentUser;
 
   public async Task<Result<OrganizationDto>> GetAsync(Guid id, CancellationToken cancellationToken = default)
   {
+    var currentOrgId = _currentUser.OrganizationId;
+    if (id != currentOrgId)
+    {
+      return Result.Failure<OrganizationDto>(OrganizationErrors.NotFound(id));
+    }
+
     var organization = await _dbContext.Organizations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     if (organization is null)
     {
