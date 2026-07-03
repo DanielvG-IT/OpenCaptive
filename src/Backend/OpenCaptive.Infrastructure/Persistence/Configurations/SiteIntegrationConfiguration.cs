@@ -36,6 +36,6 @@ public sealed class SiteIntegrationConfiguration : IEntityTypeConfiguration<Site
     builder.HasOne<Site>()
       .WithMany()
       .HasForeignKey(x => x.SiteId)
-      .OnDelete(DeleteBehavior.Cascade);
+      .OnDelete(DeleteBehavior.Restrict);
   }
 }

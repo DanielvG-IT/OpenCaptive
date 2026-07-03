@@ -33,6 +33,6 @@ public sealed class PortalConfiguration : IEntityTypeConfiguration<Portal>
     builder.HasOne<Network>()
         .WithOne()
         .HasForeignKey<Portal>(x => x.NetworkId)
-        .OnDelete(DeleteBehavior.Cascade);
+        .OnDelete(DeleteBehavior.Restrict);
   }
 }

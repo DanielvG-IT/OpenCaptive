@@ -60,22 +60,22 @@ public sealed class SiteService(OpenCaptiveDbContext dbContext, ICurrentUser cur
     return Result.Success(ToDto(site));
   }
 
-  public async Task<Result<SiteDto>> UpdateAsync(Guid id, UpdateSiteInput input, CancellationToken cancellationToken = default)
+  public async Task<Result<SiteDto>> UpdateAsync(Guid siteId, UpdateSiteInput input, CancellationToken cancellationToken = default)
   {
     var currentOrgId = _currentUser.OrganizationId;
 
     try
     {
-      var site = await _dbContext.Sites.FirstOrDefaultAsync(s => s.Id == id && s.OrganizationId == currentOrgId, cancellationToken);
+      var site = await _dbContext.Sites.FirstOrDefaultAsync(s => s.Id == siteId && s.OrganizationId == currentOrgId, cancellationToken);
       if (site is null)
       {
-        return Result.Failure<SiteDto>(SiteErrors.NotFound(id));
+        return Result.Failure<SiteDto>(SiteErrors.NotFound(siteId));
       }
 
       if (!string.IsNullOrWhiteSpace(input.Slug) && input.Slug != site.Slug)
       {
         // CRITICAL: Exclude this site itself
-        var slugExists = await _dbContext.Sites.AnyAsync(s => s.Slug == input.Slug && s.OrganizationId == currentOrgId && s.Id != id, cancellationToken);
+        var slugExists = await _dbContext.Sites.AnyAsync(s => s.Slug == input.Slug && s.OrganizationId == currentOrgId && s.Id != siteId, cancellationToken);
         if (slugExists)
         {
           return Result.Failure<SiteDto>(SiteErrors.SlugAlreadyExists(input.Slug));
@@ -108,12 +108,34 @@ public sealed class SiteService(OpenCaptiveDbContext dbContext, ICurrentUser cur
   {
     var currentOrgId = _currentUser.OrganizationId;
 
+    var exists = await _dbContext.Sites.AnyAsync(x => x.Id == siteId && x.OrganizationId == currentOrgId, cancellationToken);
+    if (!exists)
+    {
+      return Result.Failure(SiteErrors.NotFound(siteId));
+    }
+
+    var hasIntegrations = await _dbContext.SiteIntegrations.AnyAsync(x => x.SiteId == siteId, cancellationToken);
+    if (hasIntegrations)
+    {
+      return Result.Failure(SiteErrors.CannotDeleteBecauseHasIntegrations(siteId));
+    }
+
+    var hasNetworks = await _dbContext.Networks.AnyAsync(x => x.SiteId == siteId, cancellationToken);
+    if (hasNetworks)
+    {
+      return Result.Failure(SiteErrors.CannotDeleteBecauseHasNetworks(siteId));
+    }
+
     try
     {
+      // 4. Execute Delete
       var deletedCount = await _dbContext.Sites.Where(x => x.Id == siteId && x.OrganizationId == currentOrgId).ExecuteDeleteAsync(cancellationToken);
-      return deletedCount > 0
-                  ? Result.Success()
-                  : Result.Failure(SiteErrors.NotFound(siteId));
+      if (deletedCount == 0)
+      {
+        return Result.Failure(SiteErrors.NotFound(siteId));
+      }
+
+      return Result.Success();
     }
     catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.ForeignKeyViolation)
     {
