@@ -1,0 +1,63 @@
+name: opencaptive
+
+services:
+
+  # ---------------------------------------------------------
+  # DATABASE
+  # ---------------------------------------------------------
+  postgres:
+    image: postgres:18-alpine
+    container_name: opencaptive-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: opencaptive
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres-data:/var/lib/postgresql
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d opencaptive"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------
+  # SMTP / EMAIL TESTING
+  # ---------------------------------------------------------
+  papercut:
+    image: changemakerstudiosus/papercut-smtp:latest
+    container_name: opencaptive-papercut
+    restart: unless-stopped
+
+    ports:
+      - "25:2525"      # SMTP port (your .NET app sends emails here)
+      - "37408:8080"   # Web UI (view trapped emails here)
+
+  # ---------------------------------------------------------
+  # LOGGING (SERILOG)
+  # ---------------------------------------------------------
+  seq:
+    image: datalust/seq:latest
+    container_name: opencaptive-seq
+    restart: unless-stopped
+
+    environment:
+      ACCEPT_EULA: "Y"
+      SEQ_FIRSTRUN_ADMINPASSWORDHASH: "${SEQ_ADMIN_PASSWORD_HASH}"
+
+    ports:
+      - "5341:5341"    # Ingestion port (Serilog pushes logs here)
+      - "8081:80"      # Web UI (view logs here)
+
+    volumes:
+      - seq-data:/data
+
+volumes:
+  postgres-data:
+  seq-data:
