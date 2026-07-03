@@ -29,13 +29,13 @@ public sealed class SmtpOptions
   public int Port { get; init; }
   public string? Username { get; init; }
   public string? Password { get; init; }
-  public SmtpSecurityMode SecurityMode { get; init; } = SmtpSecurityMode.Auto;
+  public SmtpSecurityMode SecurityMode { get; init; } = SmtpSecurityMode.StartTls;
   public TimeSpan Timeout { get; init; }
 }
 
 public enum SmtpSecurityMode
 {
-  /// <summary>Allows MailKit to decide based on server capabilities (often defaults to StartTls if available).</summary>
+  /// <summary>Negotiates with the server and falls back to plaintext if STARTTLS isn't advertised — vulnerable to downgrade attacks. Avoid outside trusted local dev tooling.</summary>
   Auto,
   /// <summary>No encryption (required for local dev tools like Papercut/MailHog).</summary>
   None,
