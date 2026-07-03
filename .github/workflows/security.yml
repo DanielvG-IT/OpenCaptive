@@ -57,6 +57,13 @@ jobs:
           severity-cutoff: high
           fail-build: ${{ github.event_name != 'pull_request' }}
 
+      - name: Patch SARIF artifact locations
+        if: always()
+        run: |
+          [ -f artifacts/sarif/backend.sarif ] || exit 0
+          jq '(.runs[].results[] | select(.locations == null or .locations == [])).locations = [{"physicalLocation":{"artifactLocation":{"uri":"artifacts/sbom/backend.cdx.json"}}}]' \
+            artifacts/sarif/backend.sarif > /tmp/backend.sarif && mv /tmp/backend.sarif artifacts/sarif/backend.sarif
+
       - name: Upload SARIF
         if: always()
         uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
@@ -126,6 +133,13 @@ jobs:
           output-file: artifacts/sarif/${{ matrix.app }}.sarif
           severity-cutoff: high
           fail-build: ${{ github.event_name != 'pull_request' }}
+
+      - name: Patch SARIF artifact locations
+        if: always()
+        run: |
+          [ -f artifacts/sarif/${{ matrix.app }}.sarif ] || exit 0
+          jq '(.runs[].results[] | select(.locations == null or .locations == [])).locations = [{"physicalLocation":{"artifactLocation":{"uri":"artifacts/sbom/${{ matrix.app }}.cdx.json"}}}]' \
+            artifacts/sarif/${{ matrix.app }}.sarif > /tmp/${{ matrix.app }}.sarif && mv /tmp/${{ matrix.app }}.sarif artifacts/sarif/${{ matrix.app }}.sarif
 
       - name: Upload SARIF
         if: always()
