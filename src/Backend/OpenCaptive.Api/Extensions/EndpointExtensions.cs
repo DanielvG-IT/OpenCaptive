@@ -1,5 +1,4 @@
 using System.Reflection;
-using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using OpenCaptive.Api.Endpoints;
 
@@ -32,14 +31,13 @@ public static class EndpointExtensions
       Predicate = (check) => check.Tags.Contains("ready")
     });
 
-    // Detailed diagnostics for humans/dashboards: full per-check JSON including descriptions
-    // and exception text, so it MUST be protected. RequireAuthorization closes the anonymous
-    // information-disclosure now; longer term this should move to a dedicated ops permission
-    // and/or network restriction once a system-permission tier exists.
-    app.MapHealthChecks("/health/detail", new HealthCheckOptions
-    {
-      ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    }).RequireAuthorization();
+    // A detailed diagnostics endpoint (full per-check JSON) is intentionally omitted: it
+    // leaks component names and exception text, and RequireAuthorization alone is too broad
+    // for ops-only data. Add it later behind a dedicated ops permission, once one exists.
+    // app.MapHealthChecks("/health/detail", new HealthCheckOptions
+    // {
+    //   ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    // })
 
     // Business API surface: all authenticated resource endpoints live under /api, each
     // module mapping its own routes and applying its own authorization (see RequirePermission).
