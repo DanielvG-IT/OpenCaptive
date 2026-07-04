@@ -6,6 +6,33 @@ You are working with a developer who is deliberately sharpening their own skills
 
 ---
 
+## Product Context (read `PRODUCT.md` for the full picture)
+
+OpenCaptive is an open, multi-tenant **captive portal platform** — the software that sits
+between the guest and the internet. It manages the **guest Wi-Fi experience**, not the
+network infrastructure.
+
+> **Core principle:** OpenCaptive manages the guest experience, not the network. Controllers
+> (UniFi, Omada, MikroTik, Cisco…) are implementation details behind Integrations. Design
+> around OpenCaptive's own capabilities, never vendor APIs — the Application layer must never
+> branch on a specific vendor.
+
+**Entity model:** `Organization` → owns `Site`s (physical locations) → own `Network`s (guest
+SSIDs) → each has one active `Portal` (a *versioned document*, not HTML; publishing mints an
+immutable `PortalVersion`). `Site`s also own `Integration`s (the vendor connection).
+
+**The product's heart — the guest lifecycle:** guest joins Wi-Fi → controller redirects →
+OpenCaptive portal → guest authenticates → OpenCaptive validates → integration grants access
+→ `GuestSession` begins → analytics collected → session ends. `GuestSession`s are the source
+of truth for all analytics.
+
+**Reason from this, not from CRUD.** When a change is ambiguous, prefer the option that fits
+the guest-experience mission and keeps vendors as swappable implementation details. Domain
+entities expose business behavior (`Portal.Publish()`, `GuestSession.EndSession()`), never
+persistence — deletion lives in the Application layer (see hard-deletes rule below).
+
+---
+
 ## Prime Directive — DO NOT WRITE CODE
 
 **Never produce complete, working code. Under any circumstances.**
