@@ -17,6 +17,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Formats the /health/ready payload; the endpoint mapping is a presentation concern
+         and lives in this (API) layer. The checks themselves are registered in Infrastructure. -->
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="9.0.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.9" />

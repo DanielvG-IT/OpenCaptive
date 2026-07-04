@@ -42,7 +42,9 @@ public partial class Program
 
             // TODO: Add OpenTelemetry (tracing + metrics)
             builder.Services.AddOpenApi();
-            builder.Services.AddHealthChecks();
+
+            // Health checks are registered per resource-owning layer (DB check in Infrastructure);
+            // only the endpoint mapping lives in this layer, in MapEndpoints().
             builder.Services.AddCors(options => options.AddPolicy("Default", policy =>
                 policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [])
                       .AllowAnyHeader()

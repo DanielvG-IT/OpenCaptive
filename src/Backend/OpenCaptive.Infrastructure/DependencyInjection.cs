@@ -27,6 +27,14 @@ public static class DependencyInjection
 
     services.AddDbContext<OpenCaptiveDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("Postgres")));
 
+    // Health checks for infrastructure-owned resources are registered here, beside the
+    // resources they probe. Endpoint mapping (/health/live, /health/ready) stays in the API layer.
+    services.AddHealthChecks()
+        .AddDbContextCheck<OpenCaptiveDbContext>(name: "database_check", tags: ["ready"]);
+    // Future infrastructure checks belong here too, e.g.:
+    // .AddRedis(configuration.GetConnectionString("Redis")!, name: "redis_check", tags: ["ready"])
+    // .AddUrlGroup(new Uri("https://sms-provider.com"), name: "sms_gateway_check", tags: ["ready"]);
+
     services.AddScoped<IOrganizationService, OrganizationService>();
     services.AddScoped<IProfileService, ProfileService>();
     services.AddScoped<ISiteService, SiteService>();
