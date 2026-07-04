@@ -61,7 +61,12 @@ jobs:
         if: always()
         run: |
           [ -f artifacts/sarif/backend.sarif ] || exit 0
-          jq '(.runs[].results[] | select(.locations == null or .locations == [])).locations = [{"physicalLocation":{"artifactLocation":{"uri":"artifacts/sbom/backend.cdx.json"}}}]' \
+          jq '.runs[].results[].locations |= (
+                (if ((. // []) | length) == 0 then [{}] else . end)
+                | map(if (.physicalLocation.artifactLocation.uri // "") == ""
+                      then {physicalLocation:{artifactLocation:{uri:"artifacts/sbom/backend.cdx.json"}}}
+                      else . end)
+              )' \
             artifacts/sarif/backend.sarif > /tmp/backend.sarif && mv /tmp/backend.sarif artifacts/sarif/backend.sarif
 
       - name: Upload SARIF
@@ -138,7 +143,12 @@ jobs:
         if: always()
         run: |
           [ -f artifacts/sarif/${{ matrix.app }}.sarif ] || exit 0
-          jq '(.runs[].results[] | select(.locations == null or .locations == [])).locations = [{"physicalLocation":{"artifactLocation":{"uri":"artifacts/sbom/${{ matrix.app }}.cdx.json"}}}]' \
+          jq '.runs[].results[].locations |= (
+                (if ((. // []) | length) == 0 then [{}] else . end)
+                | map(if (.physicalLocation.artifactLocation.uri // "") == ""
+                      then {physicalLocation:{artifactLocation:{uri:"artifacts/sbom/${{ matrix.app }}.cdx.json"}}}
+                      else . end)
+              )' \
             artifacts/sarif/${{ matrix.app }}.sarif > /tmp/${{ matrix.app }}.sarif && mv /tmp/${{ matrix.app }}.sarif artifacts/sarif/${{ matrix.app }}.sarif
 
       - name: Upload SARIF
