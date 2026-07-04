@@ -1,0 +1,24 @@
+meta {
+  name: Update Site
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/sites/{{siteId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}
+
+body:json {
+  {
+    "name": "Main Warehouse (Renamed)",
+    "slug": null,
+    "timeZone": null,
+    "description": "Updated description"
+  }
+}

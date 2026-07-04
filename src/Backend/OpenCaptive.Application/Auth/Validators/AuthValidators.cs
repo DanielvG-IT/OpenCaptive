@@ -1,5 +1,6 @@
 using FluentValidation;
 using OpenCaptive.Application.Auth.Models;
+using OpenCaptive.Application.Common.Validation;
 
 namespace OpenCaptive.Application.Auth.Validators;
 
@@ -13,9 +14,8 @@ public sealed class RegisterInputValidator : AbstractValidator<RegisterInput>
 
     RuleFor(x => x.OrganizationSlug)
         .NotEmpty()
-        .MinimumLength(3)
-        .MaximumLength(50)
-        .Matches("^[a-z][a-z-]*[a-z]$");
+        .MaximumLength(100)
+        .MustBeValidSlug();
 
     RuleFor(x => x.FirstName)
         .NotEmpty()

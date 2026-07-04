@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using OpenCaptive.Domain.Auth;
-using OpenCaptive.Infrastructure.Auth;
 using OpenCaptive.Domain.Organizations;
+using OpenCaptive.Infrastructure.Auth;
 
 namespace OpenCaptive.Api.Authorization;
 
@@ -13,12 +13,6 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
     var orgIdClaim = context.User.FindFirst(OrganizationClaimTypes.OrganizationId)?.Value;
 
     if (roleClaim is null || orgIdClaim is null || !Enum.TryParse<OrganizationRole>(roleClaim, out var role) || !RolePermissions.RoleHasPermission(role, requirement.Permission))
-    {
-      return Task.CompletedTask;
-    }
-
-    // Single-org for now: if the route targets a specific organization, it must be the caller's own.
-    if (context.Resource is HttpContext httpContext && httpContext.Request.RouteValues.TryGetValue("id", out var routeId) && routeId?.ToString() != orgIdClaim)
     {
       return Task.CompletedTask;
     }

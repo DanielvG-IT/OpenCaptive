@@ -36,11 +36,11 @@ public sealed class NetworkConfiguration : IEntityTypeConfiguration<Network>
     builder.HasOne<Site>()
       .WithMany()
       .HasForeignKey(x => x.SiteId)
-      .OnDelete(DeleteBehavior.Cascade);
+      .OnDelete(DeleteBehavior.Restrict);
 
     builder.HasOne<SiteIntegration>()
       .WithMany()
       .HasForeignKey(x => x.SiteIntegrationId)
-      .OnDelete(DeleteBehavior.Cascade);
+      .OnDelete(DeleteBehavior.Restrict);
   }
 }

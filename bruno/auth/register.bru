@@ -1,0 +1,22 @@
+meta {
+  name: Register
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "organizationName": "Test Org",
+    "organizationSlug": "test-org",
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "test@opencaptive.local",
+    "password": "Password123!"
+  }
+}

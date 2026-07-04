@@ -1,0 +1,25 @@
+meta {
+  name: Login
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "test@opencaptive.local",
+    "password": "Password123!"
+  }
+}
+
+script:post-response {
+  if (res.body.tokens) {
+    bru.setEnvVar("accessToken", res.body.tokens.accessToken);
+    bru.setEnvVar("refreshToken", res.body.tokens.refreshToken);
+  }
+}

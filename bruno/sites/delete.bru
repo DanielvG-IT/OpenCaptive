@@ -1,0 +1,15 @@
+meta {
+  name: Delete Site
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/sites/{{siteId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{accessToken}}
+}

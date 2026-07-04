@@ -1,0 +1,23 @@
+meta {
+  name: Verify Email
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/auth/verify-email
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "userId": "{{verifyEmailUserId}}",
+    "token": "{{verifyEmailToken}}"
+  }
+}
+
+docs {
+  Register doesn't return a userId or token — grab both from the
+  verification email caught by Papercut (http://localhost:37408).
+}
