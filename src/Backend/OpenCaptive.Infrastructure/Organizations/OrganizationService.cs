@@ -14,44 +14,40 @@ public sealed class OrganizationService(OpenCaptiveDbContext dbContext, ICurrent
   private readonly OpenCaptiveDbContext _dbContext = dbContext;
   private readonly ICurrentUser _currentUser = currentUser;
 
-  public async Task<Result<OrganizationDto>> GetAsync(Guid id, CancellationToken cancellationToken = default)
+  public async Task<Result<OrganizationDto>> GetAsync(CancellationToken cancellationToken = default)
   {
     var currentOrgId = _currentUser.OrganizationId;
-    if (id != currentOrgId)
-    {
-      return Result.Failure<OrganizationDto>(OrganizationErrors.NotFound(id));
-    }
 
-    var organization = await _dbContext.Organizations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    var organization = await _dbContext.Organizations.FirstOrDefaultAsync(x => x.Id == currentOrgId, cancellationToken);
     if (organization is null)
     {
-      return Result.Failure<OrganizationDto>(OrganizationErrors.NotFound(id));
+      return Result.Failure<OrganizationDto>(OrganizationErrors.NotFound(currentOrgId));
     }
 
     return Result.Success(ToDto(organization));
   }
 
-  public Task<Result<OrganizationDto>> UpdateAsync(Guid id, UpdateOrganizationInput input, CancellationToken cancellationToken = default)
+  public Task<Result<OrganizationDto>> UpdateAsync(UpdateOrganizationInput input, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }
 
-  public Task<Result<OrganizationDto>> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+  public Task<Result<OrganizationDto>> DeleteAsync(CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }
 
-  public Task<Result<List<MemberDto>>> GetMembersAsync(Guid id, CancellationToken cancellationToken = default)
+  public Task<Result<List<MemberDto>>> GetMembersAsync(CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }
 
-  public Task<Result<OrganizationDto>> AddMemberAsync(Guid id, AddMemberInput input, CancellationToken cancellationToken = default)
+  public Task<Result<OrganizationDto>> UpdateMemberAsync(UpdateMemberInput input, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }
 
-  public Task<Result<OrganizationDto>> RemoveMemberAsync(Guid id, Guid memberId, CancellationToken cancellationToken = default)
+  public Task<Result<OrganizationDto>> RemoveMemberAsync(Guid memberId, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }

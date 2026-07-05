@@ -20,7 +20,34 @@ public static class RolePermissions
       Permissions.Sites.ReadAll,
       Permissions.Sites.ReadOne,
       Permissions.Sites.Update,
-      Permissions.Sites.Delete
+      Permissions.Sites.Delete,
+
+      // Owner-only for now, matching the Sites precedent above — revisit once you decide
+      // whether Administrator/Editor should manage networks/integrations/portals/invitations.
+      Permissions.Networks.Create,
+      Permissions.Networks.ReadAll,
+      Permissions.Networks.ReadOne,
+      Permissions.Networks.Update,
+      Permissions.Networks.Delete,
+
+      Permissions.Integrations.Create,
+      Permissions.Integrations.ReadAll,
+      Permissions.Integrations.ReadOne,
+      Permissions.Integrations.Update,
+      Permissions.Integrations.Delete,
+      Permissions.Integrations.Connect,
+      Permissions.Integrations.Disconnect,
+      Permissions.Integrations.Sync,
+
+      Permissions.Portals.Read,
+      Permissions.Portals.Create,
+      Permissions.Portals.Update,
+      Permissions.Portals.Publish,
+
+      Permissions.Invitations.Read,
+      Permissions.Invitations.Create,
+      Permissions.Invitations.Revoke,
+      Permissions.Invitations.Resend,
     },
     [OrganizationRole.Administrator] = new HashSet<string>
     {

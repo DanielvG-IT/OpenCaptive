@@ -43,7 +43,11 @@ public static class EndpointExtensions
     // module mapping its own routes and applying its own authorization (see RequirePermission).
     app.MapGroup("/api")
       .MapOrganizationEndpoints()
+      .MapInvitationEndpoints()
       .MapSiteEndpoints()
+      .MapNetworkEndpoints()
+      .MapIntegrationEndpoints()
+      .MapPortalEndpoints()
       .MapProfileEndpoints()
       .MapAuthEndpoints();
 

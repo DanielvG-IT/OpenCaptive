@@ -15,24 +15,31 @@ public static class OrganizationEndpoints
     var group = app.MapGroup("/organizations").WithTags("Organizations");
 
     // Organization Management
-    group.MapGet("/{id:guid}", GetOrganization).RequirePermission(Permissions.Organizations.Read);
-    group.MapPatch("/{id:guid}", UpdateOrganization).RequirePermission(Permissions.Organizations.Update);
-    group.MapDelete("/{id:guid}", DeleteOrganization).RequirePermission(Permissions.Organizations.Delete);
+    group.MapGet(string.Empty, GetOrganization).RequirePermission(Permissions.Organizations.Read);
+    group.MapPatch(string.Empty, UpdateOrganization).RequirePermission(Permissions.Organizations.Update);
+    group.MapDelete(string.Empty, DeleteOrganization).RequirePermission(Permissions.Organizations.Delete);
 
     // Member Management
-    group.MapGet("/{id:guid}/members", GetMembers).RequirePermission(Permissions.Members.Read);
-    group.MapPost("/{id:guid}/members", AddMember).RequirePermission(Permissions.Members.Add);
-    group.MapDelete("/{id:guid}/members/{memberId:guid}", RemoveMember).RequirePermission(Permissions.Members.Remove);
+    group.MapGet("/members", GetAllMembers).RequirePermission(Permissions.Members.Read);
+    group.MapGet("/members/{memberId:guid}", GetOneMember).RequirePermission(Permissions.Members.Read);
+    group.MapPatch("/members/{memberId:guid}", UpdateMember).RequirePermission(Permissions.Members.Read);
+    group.MapDelete("/members/{memberId:guid}", RemoveMember).RequirePermission(Permissions.Members.Remove);
+
+    // Invitation Management moved to InvitationEndpoints.MapInvitationEndpoints()
+    // (/organizations/invitations) — Invitation has its own lifecycle/token/expiry
+    // independent of Organization, so it gets its own service.
 
     return app;
   }
 
+  //* ===============
+  //*  Organizations
+  //* ===============
   private static async Task<Results<Ok<OrganizationDto>, ProblemHttpResult>> GetOrganization(
-    [FromRoute] Guid id,
     [FromServices] IOrganizationService service,
     CancellationToken cancellationToken)
   {
-    var result = await service.GetAsync(id, cancellationToken);
+    var result = await service.GetAsync(cancellationToken);
     if (result.IsFailure)
     {
       return result.Error.ToProblem();
@@ -42,7 +49,6 @@ public static class OrganizationEndpoints
   }
 
   private static async Task<Results<Ok<OrganizationDto>, ProblemHttpResult>> UpdateOrganization(
-    [FromRoute] Guid id,
     [FromBody] UpdateOrganizationInput input,
     [FromServices] IOrganizationService service,
     CancellationToken cancellationToken)
@@ -51,24 +57,34 @@ public static class OrganizationEndpoints
   }
 
   private static async Task<Results<NoContent, ProblemHttpResult>> DeleteOrganization(
-    [FromRoute] Guid id,
     [FromServices] IOrganizationService service,
     CancellationToken cancellationToken)
   {
     throw new NotImplementedException();
   }
 
-  private static async Task<Results<Ok<List<MemberDto>>, ProblemHttpResult>> GetMembers(
-    [FromRoute] Guid id,
+
+  //* ===============
+  //*    Members
+  //* ===============
+  private static async Task<Results<Ok<List<MemberDto>>, ProblemHttpResult>> GetAllMembers(
     [FromServices] IOrganizationService service,
     CancellationToken cancellationToken)
   {
     throw new NotImplementedException();
   }
 
-  private static async Task<Results<NoContent, ProblemHttpResult>> AddMember(
-    [FromRoute] Guid id,
-    [FromBody] AddMemberInput input,
+  private static async Task<Results<Ok<MemberDto>, ProblemHttpResult>> GetOneMember(
+    [FromRoute] Guid memberId,
+    [FromServices] IOrganizationService service,
+    CancellationToken cancellationToken)
+  {
+    throw new NotImplementedException();
+  }
+
+  private static async Task<Results<NoContent, ProblemHttpResult>> UpdateMember(
+    [FromRoute] Guid memberId,
+    [FromBody] UpdateMemberInput input,
     [FromServices] IOrganizationService service,
     CancellationToken cancellationToken)
   {
@@ -76,7 +92,6 @@ public static class OrganizationEndpoints
   }
 
   private static async Task<Results<NoContent, ProblemHttpResult>> RemoveMember(
-    [FromRoute] Guid id,
     [FromRoute] Guid memberId,
     [FromServices] IOrganizationService service,
     CancellationToken cancellationToken)

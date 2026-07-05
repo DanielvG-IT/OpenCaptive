@@ -2,14 +2,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OpenCaptive.Application.Email.Contracts;
+using OpenCaptive.Application.Integrations;
+using OpenCaptive.Application.Invitations;
+using OpenCaptive.Application.Networks;
 using OpenCaptive.Application.Organizations.Contracts;
+using OpenCaptive.Application.Portals;
 using OpenCaptive.Application.Profile;
 using OpenCaptive.Application.Sites;
 using OpenCaptive.Infrastructure.Auth;
 using OpenCaptive.Infrastructure.Email;
 using OpenCaptive.Infrastructure.Frontend;
+using OpenCaptive.Infrastructure.Integrations;
+using OpenCaptive.Infrastructure.Invitations;
+using OpenCaptive.Infrastructure.Networks;
 using OpenCaptive.Infrastructure.Organizations;
 using OpenCaptive.Infrastructure.Persistence;
+using OpenCaptive.Infrastructure.Portals;
 using OpenCaptive.Infrastructure.Profile;
 using OpenCaptive.Infrastructure.Sites;
 
@@ -38,6 +46,10 @@ public static class DependencyInjection
     services.AddScoped<IOrganizationService, OrganizationService>();
     services.AddScoped<IProfileService, ProfileService>();
     services.AddScoped<ISiteService, SiteService>();
+    services.AddScoped<INetworkService, NetworkService>();
+    services.AddScoped<ISiteIntegrationService, SiteIntegrationService>();
+    services.AddScoped<IPortalService, PortalService>();
+    services.AddScoped<IInvitationService, InvitationService>();
 
     services.AddScoped<IFrontendLinkFactory, FrontendLinkFactory>();
 
