@@ -12,12 +12,13 @@ public static class PortalEndpoints
 {
   public static IEndpointRouteBuilder MapPortalEndpoints(this IEndpointRouteBuilder app)
   {
+    // No POST here — a Network's Portal is auto-provisioned when the Network is created
+    // (see NetworkService), never created manually.
     var portalGroup = app.MapGroup("/networks/{networkId:guid}/portal")
         .RequireAuthorization()
         .WithTags("Portals");
 
     portalGroup.MapGet(string.Empty, GetPortal).RequirePermission(Permissions.Portals.Read);
-    portalGroup.MapPost(string.Empty, CreatePortal).RequirePermission(Permissions.Portals.Create);
     portalGroup.MapPatch(string.Empty, UpdatePortal).RequirePermission(Permissions.Portals.Update);
 
     var versionGroup = app.MapGroup("/portals/{portalId:guid}/versions")
@@ -25,8 +26,12 @@ public static class PortalEndpoints
         .WithTags("Portals");
 
     versionGroup.MapGet(string.Empty, GetVersions).RequirePermission(Permissions.Portals.Read);
+    versionGroup.MapGet("/{versionId:guid}", GetVersion).RequirePermission(Permissions.Portals.Read);
     versionGroup.MapPost(string.Empty, CreateVersion).RequirePermission(Permissions.Portals.Update);
     versionGroup.MapPost("/{versionId:guid}/publish", PublishVersion).RequirePermission(Permissions.Portals.Publish);
+    // Guarded server-side: only versions that have never been published may be deleted —
+    // see PortalErrors.CannotDeletePublishedVersion.
+    versionGroup.MapDelete("/{versionId:guid}", DeleteVersion).RequirePermission(Permissions.Portals.DeleteVersion);
 
     return app;
   }
@@ -37,28 +42,6 @@ public static class PortalEndpoints
     CancellationToken cancellationToken)
   {
     var result = await service.GetAsync(networkId, cancellationToken);
-    if (result.IsFailure)
-    {
-      return result.Error.ToProblem();
-    }
-
-    return TypedResults.Ok(result.Value);
-  }
-
-  private static async Task<Results<Ok<PortalDto>, ValidationProblem, ProblemHttpResult>> CreatePortal(
-    [FromRoute] Guid networkId,
-    [FromBody] CreatePortalInput input,
-    [FromServices] IValidator<CreatePortalInput> validator,
-    [FromServices] IPortalService service,
-    CancellationToken cancellationToken)
-  {
-    var validation = await validator.ValidateAsync(input, cancellationToken);
-    if (!validation.IsValid)
-    {
-      return TypedResults.ValidationProblem(validation.ToDictionary());
-    }
-
-    var result = await service.CreateAsync(networkId, input, cancellationToken);
     if (result.IsFailure)
     {
       return result.Error.ToProblem();
@@ -103,6 +86,21 @@ public static class PortalEndpoints
     return TypedResults.Ok(result.Value);
   }
 
+  private static async Task<Results<Ok<PortalVersionDto>, ProblemHttpResult>> GetVersion(
+    [FromRoute] Guid portalId,
+    [FromRoute] Guid versionId,
+    [FromServices] IPortalService service,
+    CancellationToken cancellationToken)
+  {
+    var result = await service.GetVersionAsync(portalId, versionId, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
   private static async Task<Results<Ok<PortalVersionDto>, ValidationProblem, ProblemHttpResult>> CreateVersion(
     [FromRoute] Guid portalId,
     [FromBody] CreatePortalVersionInput input,
@@ -138,5 +136,20 @@ public static class PortalEndpoints
     }
 
     return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<NoContent, ProblemHttpResult>> DeleteVersion(
+    [FromRoute] Guid portalId,
+    [FromRoute] Guid versionId,
+    [FromServices] IPortalService service,
+    CancellationToken cancellationToken)
+  {
+    var result = await service.DeleteVersionAsync(portalId, versionId, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.NoContent();
   }
 }

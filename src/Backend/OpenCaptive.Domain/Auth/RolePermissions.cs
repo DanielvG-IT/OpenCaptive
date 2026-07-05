@@ -37,12 +37,13 @@ public static class RolePermissions
       Permissions.Integrations.Delete,
       Permissions.Integrations.Connect,
       Permissions.Integrations.Disconnect,
-      Permissions.Integrations.Sync,
+      Permissions.Integrations.SyncNetworks,
+      Permissions.Integrations.RefreshCapabilities,
 
       Permissions.Portals.Read,
-      Permissions.Portals.Create,
       Permissions.Portals.Update,
       Permissions.Portals.Publish,
+      Permissions.Portals.DeleteVersion,
 
       Permissions.Invitations.Read,
       Permissions.Invitations.Create,

@@ -40,7 +40,7 @@ public sealed class InvitationService(OpenCaptiveDbContext dbContext, ICurrentUs
     throw new NotImplementedException();
   }
 
-  public Task<Result> AcceptAsync(Guid invitationId, CancellationToken cancellationToken = default)
+  public Task<Result> AcceptAsync(Guid invitationId, AcceptInvitationInput input, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }

@@ -45,7 +45,12 @@ public sealed class SiteIntegrationService(OpenCaptiveDbContext dbContext, ICurr
     throw new NotImplementedException();
   }
 
-  public Task<Result<SiteIntegrationDto>> SyncAsync(Guid siteId, Guid integrationId, CancellationToken cancellationToken = default)
+  public Task<Result<SiteIntegrationDto>> SyncNetworksAsync(Guid siteId, Guid integrationId, CancellationToken cancellationToken = default)
+  {
+    throw new NotImplementedException();
+  }
+
+  public Task<Result<SiteIntegrationDto>> RefreshCapabilitiesAsync(Guid siteId, Guid integrationId, CancellationToken cancellationToken = default)
   {
     throw new NotImplementedException();
   }

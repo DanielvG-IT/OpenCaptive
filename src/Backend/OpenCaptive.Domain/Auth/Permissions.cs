@@ -43,15 +43,17 @@ public static class Permissions
     public const string Delete = "integrations.delete";
     public const string Connect = "integrations.connect";
     public const string Disconnect = "integrations.disconnect";
-    public const string Sync = "integrations.sync";
+    public const string SyncNetworks = "integrations.syncNetworks";
+    public const string RefreshCapabilities = "integrations.refreshCapabilities";
   }
 
   public static class Portals
   {
+    // No Create — a Portal is auto-provisioned when its Network is created, never manually.
     public const string Read = "portals.read";
-    public const string Create = "portals.create";
     public const string Update = "portals.update";
     public const string Publish = "portals.publish";
+    public const string DeleteVersion = "portals.deleteVersion";
   }
 
   public static class Invitations

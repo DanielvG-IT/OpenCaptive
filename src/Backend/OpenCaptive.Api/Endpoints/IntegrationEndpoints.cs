@@ -24,7 +24,8 @@ public static class IntegrationEndpoints
 
     group.MapPost("/{id:guid}/connect", ConnectIntegration).RequirePermission(Permissions.Integrations.Connect);
     group.MapPost("/{id:guid}/disconnect", DisconnectIntegration).RequirePermission(Permissions.Integrations.Disconnect);
-    group.MapPost("/{id:guid}/sync", SyncIntegration).RequirePermission(Permissions.Integrations.Sync);
+    group.MapPost("/{id:guid}/sync-networks", SyncNetworks).RequirePermission(Permissions.Integrations.SyncNetworks);
+    group.MapPost("/{id:guid}/refresh-capabilities", RefreshCapabilities).RequirePermission(Permissions.Integrations.RefreshCapabilities);
 
     return app;
   }
@@ -148,13 +149,28 @@ public static class IntegrationEndpoints
     return TypedResults.Ok(result.Value);
   }
 
-  private static async Task<Results<Ok<SiteIntegrationDto>, ProblemHttpResult>> SyncIntegration(
+  private static async Task<Results<Ok<SiteIntegrationDto>, ProblemHttpResult>> SyncNetworks(
     [FromRoute] Guid siteId,
     [FromRoute] Guid id,
     [FromServices] ISiteIntegrationService service,
     CancellationToken cancellationToken)
   {
-    var result = await service.SyncAsync(siteId, id, cancellationToken);
+    var result = await service.SyncNetworksAsync(siteId, id, cancellationToken);
+    if (result.IsFailure)
+    {
+      return result.Error.ToProblem();
+    }
+
+    return TypedResults.Ok(result.Value);
+  }
+
+  private static async Task<Results<Ok<SiteIntegrationDto>, ProblemHttpResult>> RefreshCapabilities(
+    [FromRoute] Guid siteId,
+    [FromRoute] Guid id,
+    [FromServices] ISiteIntegrationService service,
+    CancellationToken cancellationToken)
+  {
+    var result = await service.RefreshCapabilitiesAsync(siteId, id, cancellationToken);
     if (result.IsFailure)
     {
       return result.Error.ToProblem();

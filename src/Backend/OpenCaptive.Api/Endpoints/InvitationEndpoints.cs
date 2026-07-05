@@ -13,7 +13,7 @@ public static class InvitationEndpoints
   public static IEndpointRouteBuilder MapInvitationEndpoints(this IEndpointRouteBuilder app)
   {
     // Admin side — org-scoped management of pending invitations.
-    var adminGroup = app.MapGroup("/organizations/invitations")
+    var adminGroup = app.MapGroup("/organization/invitations")
         .RequireAuthorization()
         .WithTags("Invitations");
 
@@ -135,10 +135,11 @@ public static class InvitationEndpoints
 
   private static async Task<Results<NoContent, ProblemHttpResult>> AcceptInvitation(
     [FromRoute] Guid id,
+    [FromBody] AcceptInvitationInput input,
     [FromServices] IInvitationService service,
     CancellationToken cancellationToken)
   {
-    var result = await service.AcceptAsync(id, cancellationToken);
+    var result = await service.AcceptAsync(id, input, cancellationToken);
     if (result.IsFailure)
     {
       return result.Error.ToProblem();

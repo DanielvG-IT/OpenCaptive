@@ -2,16 +2,6 @@ using FluentValidation;
 
 namespace OpenCaptive.Application.Portals;
 
-public sealed class CreatePortalInputValidator : AbstractValidator<CreatePortalInput>
-{
-  public CreatePortalInputValidator()
-  {
-    RuleFor(x => x.Name)
-      .NotEmpty()
-      .MaximumLength(200);
-  }
-}
-
 public sealed class UpdatePortalInputValidator : AbstractValidator<UpdatePortalInput>
 {
   public UpdatePortalInputValidator()

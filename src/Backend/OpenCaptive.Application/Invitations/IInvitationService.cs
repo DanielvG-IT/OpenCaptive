@@ -14,5 +14,5 @@ public interface IInvitationService
   // Invitee side — identified by invitation id/token alone; the caller isn't a member yet,
   // so these must not assume ICurrentUser.OrganizationId.
   Task<Result<InvitationDto>> GetForInviteeAsync(Guid invitationId, CancellationToken cancellationToken = default);
-  Task<Result> AcceptAsync(Guid invitationId, CancellationToken cancellationToken = default);
+  Task<Result> AcceptAsync(Guid invitationId, AcceptInvitationInput input, CancellationToken cancellationToken = default);
 }

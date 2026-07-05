@@ -1,6 +1,5 @@
 namespace OpenCaptive.Application.Portals;
 
-public sealed record CreatePortalInput(string Name);
 public sealed record UpdatePortalInput(string? Name);
 
 public sealed record PortalDto(Guid Id, Guid NetworkId, string Name, bool IsPublished, Guid? PublishedVersionId);
