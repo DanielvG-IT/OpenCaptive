@@ -3,10 +3,16 @@
 > The canonical "why" behind OpenCaptive. `AGENTS.md` carries a condensed always-loaded
 > summary of this; read this file when you need the full mental model behind a feature.
 
-## Vision
+## Mission
 
-OpenCaptive is an open, modern, multi-tenant captive portal platform. It lets organizations
-manage guest Wi-Fi access across one or many physical locations through a single web app.
+OpenCaptive is a B2B SaaS platform that lets organizations create, manage, and analyze the
+complete guest Wi-Fi experience across any network vendor. It intentionally owns the
+**business layer** and delegates infrastructure operations to vendor integrations.
+
+Think of OpenCaptive as **the operating system for guest Wi-Fi**, not a network controller.
+
+> Whenever evaluating a feature, ask: *does this improve the guest experience, operational
+> management, or business insights?* If not, it probably doesn't belong in OpenCaptive.
 
 The goal is **not** to become another UniFi management dashboard. The goal is to become the
 software that sits **between the guest and the internet**.
@@ -24,12 +30,30 @@ capabilities, never around vendor APIs.
 
 ---
 
-## Product Philosophy
+## Product Areas
 
-OpenCaptive owns: Organizations, Sites, Networks, Captive portals, Guest authentication,
-Guest sessions, Analytics, Branding, Campaigns, Integrations.
+Vendor controllers simply expose the operations OpenCaptive needs; everything business-shaped
+lives in one of these eight areas.
 
-Vendor controllers simply expose the operations OpenCaptive needs.
+- **Identity** — Users, Organizations, Memberships, Permissions, Invitations.
+  Controls who may access OpenCaptive.
+- **Site Management** — Sites, Networks, Site Integrations.
+  Represents the customer's physical infrastructure.
+- **Portal Management** — Portal, PortalVersions, Themes, Builder, Publishing.
+  Defines what guests experience before internet access.
+- **Guest Access** — Authentication Methods, Authorization, Guest Sessions.
+  Securely connects guests to the internet.
+- **Analytics** — Visitors, Sessions, Conversions, Campaigns.
+  Turns guest traffic into business insights.
+- **Communications** — Emails, Notifications, Invitations.
+  Talks to administrators and guests.
+- **Integrations** — UniFi, Omada, MikroTik, Cisco, …
+  Bridges OpenCaptive to external infrastructure.
+- **Platform** — Audit Logs, API, Webhooks, Background Jobs, Monitoring.
+  Everything required to operate OpenCaptive as a SaaS.
+
+When picking up a task, place it in one of these areas first — it clarifies what "done" looks
+like and what it shouldn't touch. See `TODO.md` for which areas are implemented today.
 
 ---
 
@@ -88,15 +112,23 @@ guest."
 
 ---
 
-## Guest Lifecycle — the heart of the product
+## Core Product Loop — the heart of the product
 
-```
-Guest joins WiFi → Controller redirects → OpenCaptive Portal → Guest authenticates
-→ OpenCaptive validates → Integration grants access → GuestSession begins
-→ Analytics collected → Guest disconnects → GuestSession ends
-```
+Everything in OpenCaptive ultimately supports this loop; every feature should strengthen one
+or more of its steps.
 
-Everything else exists to support this lifecycle.
+1. Administrator configures Sites.
+2. Administrator connects Site Integrations.
+3. Administrator creates Networks.
+4. Administrator designs Portals.
+5. Administrator publishes a Portal.
+6. Guest connects to Wi-Fi.
+7. Network redirects guest to OpenCaptive.
+8. Guest authenticates.
+9. Integration authorizes internet access.
+10. `GuestSession` is created.
+11. Analytics are collected.
+12. Organization improves the portal using the collected insights — closing the loop.
 
 ### Guest Session
 

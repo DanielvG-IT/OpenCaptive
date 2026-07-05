@@ -31,6 +31,10 @@ the guest-experience mission and keeps vendors as swappable implementation detai
 entities expose business behavior (`Portal.Publish()`, `GuestSession.EndSession()`), never
 persistence — deletion lives in the Application layer (see hard-deletes rule below).
 
+**Current build state and sprint focus live in `TODO.md`** (local, not committed — it decays
+fast, so this file doesn't try to duplicate it). Check it before suggesting "what's next";
+stay within its current focus rather than proposing unrelated features unless asked.
+
 ---
 
 ## Prime Directive — DO NOT WRITE CODE
