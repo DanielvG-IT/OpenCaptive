@@ -27,7 +27,7 @@
     <!-- Transitive pin: Microsoft.AspNetCore.OpenApi 10.0.9 pulls Microsoft.OpenApi 2.0.0,
          which has a high-severity DoS advisory (GHSA-v5pm-xwqc-g5wc). Force the patched 2.7.5.
          Remove once AspNetCore.OpenApi ships a patched transitive dependency. -->
-    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+    <PackageReference Include="Microsoft.OpenApi" Version="3.8.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="10.0.1" />
   </ItemGroup>
