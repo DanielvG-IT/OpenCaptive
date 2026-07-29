@@ -35,6 +35,9 @@ public static class DependencyInjection
 
     services.AddDbContext<OpenCaptiveDbContext>(options => options.UseNpgsql(configuration.GetConnectionString("Postgres")));
 
+    // Must come after AddDbContext: the key ring is stored through OpenCaptiveDbContext.
+    services.AddOpenCaptiveDataProtection();
+
     // Health checks for infrastructure-owned resources are registered here, beside the
     // resources they probe. Endpoint mapping (/health/live, /health/ready) stays in the API layer.
     services.AddHealthChecks()

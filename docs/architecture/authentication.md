@@ -75,6 +75,28 @@ it is **not** stored in the database and is validated by decryption, not by hash
 is a different mechanism from refresh/invitation tokens on purpose: these are low-value,
 single-purpose, and don't need independent revocation beyond their short expiry.
 
+## Data Protection key ring
+
+Because those two token types are validated **by decryption rather than by lookup**, they are
+only as durable as the Data Protection key ring that encrypts them. The default ring is
+in-memory: fine for `dotnet run`, quietly wrong everywhere else — every container restart
+would invalidate verification and reset links already sitting in users' inboxes, and two
+replicas would reject each other's tokens outright.
+
+So the ring is persisted to Postgres (`OpenCaptiveDbContext` implements
+`IDataProtectionKeyContext`; `AddOpenCaptiveDataProtection` wires
+`PersistKeysToDbContext`). The database was chosen over a shared volume deliberately: the
+tokens are already meaningless without that database, so co-locating the ring adds no failure
+domain and no infrastructure.
+
+Two consequences worth remembering:
+
+- **`SetApplicationName("OpenCaptive")` is load-bearing.** It prefixes every purpose string;
+  changing it is equivalent to discarding the ring.
+- **The ring is stored unencrypted**, so startup logs "No XML encryptor configured". Accepted,
+  not overlooked — a wrapping certificate deployed next to the database it protects moves the
+  secret rather than securing it. Revisit if a real key vault or HSM ever exists.
+
 ## Layering
 
 - **Domain** (`RefreshToken`) owns token *state* and its computed guards (`IsActive`,
