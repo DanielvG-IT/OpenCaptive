@@ -39,25 +39,5 @@ services:
       - "25:2525"      # SMTP port (your .NET app sends emails here)
       - "37408:8080"   # Web UI (view trapped emails here)
 
-  # ---------------------------------------------------------
-  # LOGGING (SERILOG)
-  # ---------------------------------------------------------
-  seq:
-    image: datalust/seq:latest
-    container_name: opencaptive-seq
-    restart: unless-stopped
-
-    environment:
-      ACCEPT_EULA: "Y"
-      SEQ_FIRSTRUN_ADMINPASSWORDHASH: "${SEQ_ADMIN_PASSWORD_HASH}"
-
-    ports:
-      - "5341:5341"    # Ingestion port (Serilog pushes logs here)
-      - "8081:80"      # Web UI (view logs here)
-
-    volumes:
-      - seq-data:/data
-
 volumes:
   postgres-data:
-  seq-data:
