@@ -58,6 +58,9 @@ npm run lint
 npm run build
 ```
 
+Or run all of them at once with `make check`. Database changes also need a migration —
+`make migration NAME=AddSomething` — committed alongside the code that needs it.
+
 ## 🧩 Adding a New Integration
 
 Network-controller integrations implement the interfaces in

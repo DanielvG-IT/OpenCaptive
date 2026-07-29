@@ -20,4 +20,5 @@
 - [ ] I have performed a self-review of my changes
 - [ ] Backend builds and tests pass (`dotnet build` / `dotnet test`)
 - [ ] Affected frontend apps lint and build (`npm run lint` / `npm run build`)
+- [ ] Schema changes ship with an EF Core migration
 - [ ] I have updated documentation where needed
