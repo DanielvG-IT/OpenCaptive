@@ -1,0 +1,37 @@
+# Build context for the API image (context = repo root).
+#
+# Everything below is either a local build artifact, a secret, or something the image does
+# not need - keeping it out shrinks the context and, more importantly, stops a stale local
+# bin/obj from leaking into the container build.
+
+# ----- .NET build output ----------------------------------------------------
+**/bin/
+**/obj/
+**/artifacts/
+**/TestResults/
+**/*.user
+
+# ----- Secrets & local config -----------------------------------------------
+.env
+.env.*
+**/appsettings.*.local.json
+
+# ----- Frontend (built by its own Dockerfiles, from its own context) ---------
+src/Frontend/
+
+# ----- VCS, tooling & editor state ------------------------------------------
+.git/
+.github/
+.idea/
+.vs/
+.vscode/
+.claude/
+**/.DS_Store
+
+# ----- Docs & API scratch files ---------------------------------------------
+docs/
+bruno/
+*.md
+LICENSE*
+Makefile
+docker-compose*.yml

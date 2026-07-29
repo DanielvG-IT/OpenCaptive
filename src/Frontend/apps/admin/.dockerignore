@@ -1,0 +1,24 @@
+# Build context for the admin image (context = this directory).
+#
+# node_modules is the important one: the image installs from the lockfile, and shipping a
+# host-built tree in would both bloat the context and risk platform-specific binaries.
+
+node_modules/
+.next/
+out/
+build/
+
+.env
+.env.*
+
+.git/
+.vscode/
+.idea/
+.DS_Store
+
+npm-debug.log*
+yarn-error.log*
+
+Dockerfile
+.dockerignore
+sonar-project.properties
