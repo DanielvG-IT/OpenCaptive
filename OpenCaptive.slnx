@@ -1,20 +1,16 @@
 <Solution>
 
-  <Folder Name="/src/" />
-
-  <Folder Name="/src/Backend/">
-    <Project Path="src/Backend/OpenCaptive.Api/OpenCaptive.Api.csproj" />
-    <Project Path="src/Backend/OpenCaptive.Application/OpenCaptive.Application.csproj" />
-    <Project Path="src/Backend/OpenCaptive.Domain/OpenCaptive.Domain.csproj" />
-    <Project Path="src/Backend/OpenCaptive.Infrastructure/OpenCaptive.Infrastructure.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/OpenCaptive.Api/OpenCaptive.Api.csproj" />
+    <Project Path="src/OpenCaptive.Application/OpenCaptive.Application.csproj" />
+    <Project Path="src/OpenCaptive.Domain/OpenCaptive.Domain.csproj" />
+    <Project Path="src/OpenCaptive.Infrastructure/OpenCaptive.Infrastructure.csproj" />
   </Folder>
 
-  <Folder Name="/src/Backend/Integrations/">
-    <Project Path="src/Backend/OpenCaptive.Integrations.Abstractions/OpenCaptive.Integrations.Abstractions.csproj" />
-    <Project Path="src/Backend/OpenCaptive.Integrations.UniFi/OpenCaptive.Integrations.UniFi.csproj" />
+  <Folder Name="/src/Integrations/">
+    <Project Path="src/OpenCaptive.Integrations.Abstractions/OpenCaptive.Integrations.Abstractions.csproj" />
+    <Project Path="src/OpenCaptive.Integrations.UniFi/OpenCaptive.Integrations.UniFi.csproj" />
   </Folder>
-
-  <Folder Name="/src/Frontend/" />
 
   <Folder Name="/tests/">
     <!-- <Project Path="tests/OpenCaptive.UnitTests/OpenCaptive.UnitTests.csproj" /> -->
