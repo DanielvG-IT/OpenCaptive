@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OpenCaptive.Api.Authorization;
-using OpenCaptive.Api.Extensions;
 using OpenCaptive.Application.Organizations.Contracts;
 using OpenCaptive.Application.Organizations.Models;
 using OpenCaptive.Domain.Auth;
