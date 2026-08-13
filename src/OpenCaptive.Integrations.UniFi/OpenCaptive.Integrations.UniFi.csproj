@@ -2,10 +2,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OpenCaptive.Integrations.Abstractions\OpenCaptive.Integrations.Abstractions.csproj" />
+    <ProjectReference Include="..\OpenCaptive.Domain\OpenCaptive.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="UniFi.Network.Client" Version="10.4.57" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.9" />
   </ItemGroup>
 
   <PropertyGroup>
